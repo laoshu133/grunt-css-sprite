@@ -28,9 +28,9 @@
     * Windows
         前往官方网站[下载安装GM图形库](http://www.graphicsmagick.org/download.html)
           
-* **PhantomJS**
-    如果实际使用中不需要将图像处理引擎设置为`engine:'phantomjs'`，`PhantomJS`可以不安装，
+* **PhantomJS** 
 
+    如果实际使用中不需要将图像处理引擎设置为`engine:'phantomjs'`，`PhantomJS`可以不安装；    
     `PhantomJS` 为 `spritesmith` 提供 CSS选择器 与 JSON 的支持，安装方法：
         
     * Mac
