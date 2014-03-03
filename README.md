@@ -34,7 +34,7 @@
     `PhantomJS` 为 `spritesmith` 提供 CSS选择器 与 JSON 的支持，安装方法：
         
     * Mac
-        // 安装 Phantomjs
+        // 安装 Phantomjs    
         brew install phantomjs
           
     * Windows
