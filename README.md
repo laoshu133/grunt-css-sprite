@@ -3,7 +3,7 @@
 ### 这是什么
 
 这是一个帮助前端开发工程师将css代码中的切片合并成雪碧图的工具；
-其原著为 `grunt-sprite`，由于其配置参数限制目录和处理不完善（或者说不适合我，具体见配置参数）等，现在修改部分发布；
+其原著为 `grunt-sprite`，由于其配置参数限制目录结构等，不能满足我们的项目需求，现在修改部分发布；
 它的主要功能是：
 
 1. 使用二叉树排列算法，对css文件进行处理，收集切片序列，生成雪碧图
@@ -22,25 +22,22 @@
     `GraphicsMagick` 为 `grunt-css-sprite` 提供用于图像处理的框架，安装方法：
     
     * Mac
-    
-            // 安装GM图形库    
-              brew install GraphicsMagick 
-              
+		// 安装GM图形库    
+		  brew install GraphicsMagick 
+     
       * Windows
-      
           前往官方网站[下载安装GM图形库](http://www.graphicsmagick.org/download.html)
           
 * **PhantomJS**
+	如果实际使用中不需要将图像处理引擎设置为`engine:'phantomjs'`，`PhantomJS`可以不安装，
 
     `PhantomJS` 为 `spritesmith` 提供 CSS选择器 与 JSON 的支持，安装方法：
         
     * Mac
-    
             // 安装 Phantomjs
             brew install phantomjs
               
       * Windows
-      
           前往官方网站[下载安装Phantomjs](http://phantomjs.org/download.html)
           
           
@@ -86,7 +83,7 @@
           }
       }
       
-      
+
 * **files**
 
     使用标准的动态文件对象
