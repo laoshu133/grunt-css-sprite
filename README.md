@@ -157,5 +157,6 @@
 
 ### 致谢
 
+感谢 [spritesmith](https://github.com/Ensighten/spritesmith)
 感谢 [Meters](https://github.com/hellometers)
 
