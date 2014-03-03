@@ -94,30 +94,32 @@
 * **options**
 
     * `engine` 
-    
         必选项，指定图像处理引擎，默认选择gm
+
     * `algorithm` 
-    
         必选项，指定排列方式，有`top-down` （从上至下）, `left-right`（从左至右）, `diagonal`（从左上至右下）, `alt-diagonal` （从左下至右上）和 `binary-tree`（二叉树排列） 五种供选择，默认binary-tree
-    * `padding` 
-    
-        可选项，指定各图片间间距，默认 0
+
     * `imagepath` 
-    
         必选项，sprite背景图源文件夹，只有匹配此路径才会处理，默认 images/slice/
+        
+    * `spritepath` 
+        必选项，替换后的背景路径，默认 ../images/
+
     * `spritedest` 
-    
         必选项，雪碧图输出目录，注意，会覆盖之前文件！默认 images/
+
+    * `padding` 
+        可选项，指定各图片间间距，默认 0
+
     * `newsprite` 
-    
         可选项，是否以时间戳为文件名生成新的雪碧图文件，如果启用请注意清理之前生成的文件，默认不生成新文件
+
     * `spritestamp` 
-    
         可选项，是否给雪碧图追加时间戳，默认不追加
+
     * `cssstamp` 
-    
         可选项，是否在CSS文件末尾追加时间戳，默认不追加
-    
+
 ### 载入插件
 
 请不要忘了载入插件
@@ -165,4 +167,5 @@
 ### 致谢
 
 感谢 [spritesmith](https://github.com/Ensighten/spritesmith)
+
 感谢 [Meters](https://github.com/hellometers)
