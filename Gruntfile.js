@@ -41,10 +41,14 @@ module.exports = function(grunt) {
 				// 导出的css名
 				ext: '.sprite.css'
 			}
+		},
+		jshint: {
+			all: [ 'Gruntfile.js', 'tasks/*.js' ]
 		}
 	});
 
 	// 载入任务
+	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadTasks('tasks');
 
 	// 声明别名

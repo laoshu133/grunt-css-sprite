@@ -99,10 +99,6 @@ module.exports = function (grunt) {
 					var newCss = css.replace(rurl, '('+ spriteImg +')');
 					newCss += ' background-position:-'+ coordData.x +'px -'+ coordData.y +'px;';
 					cssData = cssData.replace(css, newCss);
-
-					//For retina css replace
-					cssHash[newCss] = cssHash[css];
-					cssList[inx] = newCss;
 				}
 			});
 			return cssData;
@@ -145,35 +141,56 @@ module.exports = function (grunt) {
 			bgWidth = Math.floor(sliceData.retinaSpriteSize.width / 2),
 			spriteImg = options.spritepath + spriteFilename + sliceData.destImgStamp,
 			retinaCss = '\n\n/* '+ spriteFilename + ' */\n',
+			cssSelectorHash = {},
 			cssSelectors = [],
-			selectorInx = 0,
-			cssProps = '';
+			cssProps = [],
+			lastInx = -1;
 
 			//规避 a[href*='}{']::after{ content:'}{';} 这类奇葩CSS
 			cssData = cssData.replace(/[:=]\s*([\'\"]).*?\1/g, function(a){
-				return a.replace(/\}/g, '\\007d');
+				return a.replace(/\}/g, '');
+			});
+
+			sliceData.retinaCssList.forEach(function(css){
+				var 
+				selector,
+				selectorInx,
+				posData = coords[retinaCssHash[css]],
+				rselector = new RegExp('([^}\\n\\/]+)\\{[^\\}]*?' + css.replace(rreEscape, '\\$&'));
+				
+				if(posData){
+					cssData = cssData.replace(rselector, function(a, b){
+						selector = b;
+						return b + '{';
+					});
+				}
+
+				if(!selector){ return; }
+
+				selectorInx = ++lastInx;
+				cssSelectors[selectorInx] = selector;
+				cssProps[selectorInx] = selector + '{ background-position:-';
+				cssProps[selectorInx] += (posData.x/2) + 'px -' + (posData.y/2) + 'px;}';
+
+				//剔除重复选择器，并且保证选择器顺序
+				selectorInx = cssSelectorHash[selector];
+				if(isFinite(selectorInx)){
+					cssSelectorHash[selector] = --lastInx;
+					cssSelectors.splice(selectorInx, 1);
+					cssProps.splice(selectorInx, 1);
+				}
+				else{
+					cssSelectorHash[selector] = lastInx;
+				}
 			});
 
 			//http://w3ctech.com/p/1430
 			retinaCss += '@media only screen and (-o-min-device-pixel-ratio: 3/2), only screen and (min--moz-device-pixel-ratio: 1.5), only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min-resolution: 240dpi), only screen and (min-resolution: 2dppx) {\n';
 
-			sliceData.retinaCssList.forEach(function(css){
-				var 
-				posData = coords[retinaCssHash[css]],
-				re = new RegExp('([^}\\n\\/]+)\\{[^\\}]*?' + css.replace(rreEscape, '\\$&'));
-				if(posData && re.test(cssData)){
-					cssSelectors[selectorInx++] = RegExp.$1;
-
-					cssProps += cssSelectors[selectorInx-1] + '{ ';
-					cssProps += 'background-position:-' + (posData.x/2) + 'px -' + (posData.y/2) + 'px;';
-					cssProps += '}\n';
-				}
-			});
-
 			retinaCss += cssSelectors.join(',');
 			retinaCss += '{ background-image:url('+ spriteImg +'); background-size:' + bgWidth + 'px auto;}\n';
-			retinaCss += cssProps;
-			retinaCss += '}\n';
+			retinaCss += cssProps.join('\n');
+			retinaCss += '\n}\n';
 			return retinaCss;
 		}
 
@@ -224,7 +241,7 @@ module.exports = function (grunt) {
 				grunt.log.writelns(('Done! [Created] -> ' + destImg));
 
 				// 替换CSS
-				cssData = replaceCSS(cssData, sliceData, ret.coordinates);
+				var newCssData = replaceCSS(cssData, sliceData, ret.coordinates);
 
 				// 处理 retina
 				var destRetinaImg = sliceData.destRetinaImg = destImg.replace(/\.png$/, '@2x.png');
@@ -251,15 +268,15 @@ module.exports = function (grunt) {
 							grunt.log.writelns(('Done! [Created] -> ' + destRetinaImg));
 
 							sliceData.retinaSpriteSize = size;
-							cssData += getRetinaCSS(cssData, sliceData, ret.coordinates);
-							doneSprite(cssData, destCSS);
+							newCssData += getRetinaCSS(cssData, sliceData, ret.coordinates);
+							doneSprite(newCssData, destCSS);
 
 							callback(null);
 						});
 					});
 				}
 				else{
-					doneSprite(cssData, destCSS);
+					doneSprite(newCssData, destCSS);
 					callback(null);
 				}
 			});

@@ -152,9 +152,10 @@
 
 ### 特别注意
 
-1. 理论上所有的切片都应该是`.png`格式，`png8` `png24` 和 `png32`不限
-2. 理论上高清切片都应该是源切片尺寸的2倍，所以所有高清切片的尺寸宽和高都必须是偶数
-3. 生成后的雪碧图将以源css文件名来命名
+1. 生成后的雪碧图将以源css文件名来命名
+2. 仅当CSS中定义`url(xxxx)`的路径匹配参数`imagepath`才进行处理，和具体`background`，`background-image`CSS无关，这里有区别于`grunt-sprite`
+3. 理论上高清切片都应该是源切片尺寸的2倍，所以所有高清切片的尺寸宽和高都必须是偶数
+4. 理论上所有的切片都应该是`.png`格式，`png8` `png24` 和 `png32`不限
 
 ### 版本记录
 
@@ -163,6 +164,8 @@
 `0.0.2` 完善部分处理流程，优化图片重复，规避 `a[href*='}{']::after{ content:'}{';}` 这类奇葩CSS
 
 `0.0.5` 修改 `spritesmith` 依赖为 `0.18.0`，实现`padding`参数；优化Retina处理流程，拼合选择器，减小CSS文件体积 `.a,.b,.c{ background-image:url(icon.png); background-size:95px auto;}`
+
+`0.0.6` 修正生成Retina CSS部分一个严重的逻辑错误，去除重复选择器生成；完善测试用例；添加`grunt jshint`任务
 
 ### 致谢
 
