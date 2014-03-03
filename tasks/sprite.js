@@ -6,19 +6,17 @@ gm = require('gm');
 
 module.exports = function (grunt) {
 	"use strict";
-	
+
 	grunt.registerMultiTask('sprite', 'Create sprite image with slices and update the CSS file.', function () {
-		var 
-		self = this,
-		done = this.async();
+		var done = this.async();
 
 		var options = this.options({
 			// 默认使用GM图像处理引擎
 			engine: 'gm',
 			// 默认使用二叉树最优排列算法
 			algorithm: 'binary-tree',
-			// 各图片间间距（貌似无效），默认 2
-			padding: 2,
+			// 各图片间间距，默认 0
+			padding: 0,
 			// sprite背景图源文件夹，只有匹配此路径才会处理，默认 images/slice/
 			imagepath: 'images/slice/',
 			// 雪碧图输出目录，注意，会覆盖之前文件！默认 images/
@@ -33,14 +31,10 @@ module.exports = function (grunt) {
 			cssstamp: false
 		});
 
-		//console.log(this.data);
-		//console.log(options);
-		//console.log(this.files);
-		
 		function fixPath(path){
 			return String(path).replace(/\\/g, '/').replace(/\/$/, '');
 		}
-		
+
 		function getSliceData(cssPath, cssData){
 			var 
 			slicePath = fixPath(options.imagepath),
@@ -75,7 +69,7 @@ module.exports = function (grunt) {
 				cssList: cssList
 			};
 		}
-		
+
 		function createSprite(list, callback){
 			spritesmith({
 				algorithm: options.algorithm,
@@ -102,13 +96,13 @@ module.exports = function (grunt) {
 				var coordData = coords[cssHash[css]];
 
 				if(coordData){
-					var newCSS = css.replace(rurl, '('+ spriteImg +')');
-					newCSS += ' background-position:-'+ coordData.x +'px -'+ coordData.y +'px;';
-					cssData = cssData.replace(css, newCSS);
+					var newCss = css.replace(rurl, '('+ spriteImg +')');
+					newCss += ' background-position:-'+ coordData.x +'px -'+ coordData.y +'px;';
+					cssData = cssData.replace(css, newCss);
 
 					//For retina css replace
-					cssHash[newCSS] = cssHash[css];
-					cssList[inx] = newCSS;
+					cssHash[newCss] = cssHash[css];
+					cssList[inx] = newCss;
 				}
 			});
 			return cssData;
@@ -143,38 +137,46 @@ module.exports = function (grunt) {
 			return sliceData;
 		}
 
-		function addRetinaCSS(cssData, sliceData, coords){
+		function getRetinaCSS(cssData, sliceData, coords){
 			var 
 			rreEscape = /[-\/\\^$*+?.()|[\]{}]/g,
 			retinaCssHash = sliceData.retinaCssHash,
 			spriteFilename = path.basename(sliceData.destRetinaImg),
 			bgWidth = Math.floor(sliceData.retinaSpriteSize.width / 2),
 			spriteImg = options.spritepath + spriteFilename + sliceData.destImgStamp,
-			cssItem = 'background-image:url('+ spriteImg +'); background-position:{pos}; background-size:' + bgWidth + 'px auto;',
-			cssTxt = '\n\n/* '+ spriteFilename + ' */\n';
-			//http://w3ctech.com/p/1430
-			cssTxt += '@media only screen and (-o-min-device-pixel-ratio: 3/2), only screen and (min--moz-device-pixel-ratio: 1.5), only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min-resolution: 240dpi), only screen and (min-resolution: 2dppx) {\n';
+			retinaCss = '\n\n/* '+ spriteFilename + ' */\n',
+			cssSelectors = [],
+			selectorInx = 0,
+			cssProps = '';
 
-			//用于规避 a[href*='}{']::after{ content:'}{';} 这类奇葩CSS
-			var tmpCss = cssData.replace(/[:=]\s*([\'\"]).*?\1/g, function(a){
+			//规避 a[href*='}{']::after{ content:'}{';} 这类奇葩CSS
+			cssData = cssData.replace(/[:=]\s*([\'\"]).*?\1/g, function(a){
 				return a.replace(/\}/g, '\\007d');
 			});
+
+			//http://w3ctech.com/p/1430
+			retinaCss += '@media only screen and (-o-min-device-pixel-ratio: 3/2), only screen and (min--moz-device-pixel-ratio: 1.5), only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min-resolution: 240dpi), only screen and (min-resolution: 2dppx) {\n';
 
 			sliceData.retinaCssList.forEach(function(css){
 				var 
 				posData = coords[retinaCssHash[css]],
 				re = new RegExp('([^}\\n\\/]+)\\{[^\\}]*?' + css.replace(rreEscape, '\\$&'));
-				if(posData && re.test(tmpCss)){
-					cssTxt += RegExp.$1 + '{';
-					cssTxt += cssItem.replace('{pos}', '-' + (posData.x/2) +'px -'+ (posData.y/2) + 'px');
-					cssTxt += '}\n';
+				if(posData && re.test(cssData)){
+					cssSelectors[selectorInx++] = RegExp.$1;
+
+					cssProps += cssSelectors[selectorInx-1] + '{ ';
+					cssProps += 'background-position:-' + (posData.x/2) + 'px -' + (posData.y/2) + 'px;';
+					cssProps += '}\n';
 				}
 			});
 
-			cssTxt += '}\n';
-			return cssData + cssTxt;
+			retinaCss += cssSelectors.join(',');
+			retinaCss += '{ background-image:url('+ spriteImg +'); background-size:' + bgWidth + 'px auto;}\n';
+			retinaCss += cssProps;
+			retinaCss += '}\n';
+			return retinaCss;
 		}
-		
+
 		function doneSprite(cssData, destCSS){
 			if(options.cssstamp){
 				var timeNow = grunt.template.today('yyyymmddHHmmss');
@@ -249,7 +251,7 @@ module.exports = function (grunt) {
 							grunt.log.writelns(('Done! [Created] -> ' + destRetinaImg));
 
 							sliceData.retinaSpriteSize = size;
-							cssData = addRetinaCSS(cssData, sliceData, ret.coordinates);
+							cssData += getRetinaCSS(cssData, sliceData, ret.coordinates);
 							doneSprite(cssData, destCSS);
 
 							callback(null);

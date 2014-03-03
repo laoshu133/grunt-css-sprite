@@ -14,6 +14,8 @@ module.exports = function(grunt) {
 				engine: 'gm',
 				// 默认使用二叉树最优排列算法
 				algorithm: 'binary-tree',
+				// 各图片间间距，默认 0
+				padding: 2,
 				// sprite背景图源文件夹，只有匹配此路径才会处理，默认 images/slice/
 				imagepath: 'test/slice/',
 				// 雪碧图输出目录，注意，会覆盖之前文件！默认 images/
