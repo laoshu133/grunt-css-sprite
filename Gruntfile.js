@@ -5,7 +5,7 @@
  * Licensed under the MIT license.
  */
 
-module.exports = function(grunt) {
+module.exports = function(grunt){
 	grunt.initConfig({
 		//Auto sprite
 		sprite: {
@@ -29,17 +29,19 @@ module.exports = function(grunt) {
 				// 在CSS文件末尾追加时间戳，默认不追加
 				cssstamp: true
 			},
-			files: {
-				//启用动态扩展
-				expand: true,
-				// css文件源的文件夹
-				cwd: 'test/css/',
-				// 匹配规则
-				src: '*.css',
-				//导出css和sprite的路径地址
-				dest: 'test/publish/css/',
-				// 导出的css名
-				ext: '.sprite.css'
+			autoSprite: {
+				files: [{
+					//启用动态扩展
+					expand: true,
+					// css文件源的文件夹
+					cwd: 'test/css/',
+					// 匹配规则
+					src: '*.css',
+					//导出css和sprite的路径地址
+					dest: 'test/publish/css/',
+					// 导出的css名
+					ext: '.sprite.css'
+				}]
 			}
 		},
 		jshint: {
