@@ -1,4 +1,4 @@
-## grunt-sprite
+## grunt-css-sprite
 
 ### 这是什么
 
@@ -15,11 +15,11 @@
 
 ### 安装依赖
 
-`grunt-sprite` 使用 [spritesmith](https://github.com/Ensighten/spritesmith) 作为内部核心算法，根据官方文档中提到的[基本依赖](https://github.com/Ensighten/spritesmith#requirements)，须要安装[Graphics Magick(gm)](http://www.graphicsmagick.org/) 和 [PhantomJS](http://phantomjs.org/) 两个依赖。
+`grunt-css-sprite` 使用 [spritesmith](https://github.com/Ensighten/spritesmith) 作为内部核心算法，根据官方文档中提到的[基本依赖](https://github.com/Ensighten/spritesmith#requirements)，须要安装[Graphics Magick(gm)](http://www.graphicsmagick.org/) 和 [PhantomJS](http://phantomjs.org/) 两个依赖。
 
 * **Graphics Magick(gm)**
 
-	`GraphicsMagick` 为 `grunt-sprite` 提供用于图像处理的框架，安装方法：
+	`GraphicsMagick` 为 `grunt-css-sprite` 提供用于图像处理的框架，安装方法：
 	
 	* Mac
 	
@@ -117,7 +117,7 @@
 
 请不要忘了载入插件
 
-	grunt.loadNpmTasks('grunt-sprite');	
+	grunt.loadNpmTasks('grunt-css-sprite');	
 	
 ### 打个比方
 

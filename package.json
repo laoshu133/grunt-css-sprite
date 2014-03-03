@@ -1,7 +1,7 @@
 {
   "name": "grunt-css-sprite",
   "description": "A grunt plugin to help front engineer creating css sprite.",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "homepage": "https://github.com/laoshu133/grunt-css-sprite",
   "author": {
     "name": "mikongge",
@@ -18,7 +18,7 @@
   "licenses": [
     {
       "type": "MIT",
-      "url": "https://github.com/hellometers/grunt-sprite/blob/master/LICENSE-MIT"
+      "url": "https://github.com/laoshu133/grunt-css-sprite/blob/master/LICENSE-MIT"
     }
   ],
   "main": "Gruntfile.js",
