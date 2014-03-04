@@ -1,8 +1,6 @@
 var 
 spritesmith = require('spritesmith'),
-path = require('path'),
-fs = require('fs'),
-gm = require('gm');
+path = require('path');
 
 module.exports = function (grunt) {
 	"use strict";
@@ -252,6 +250,8 @@ module.exports = function (grunt) {
 				
 				if(sliceData.retinaSliceList && sliceData.retinaSliceList.length){
 					createSprite(sliceData.retinaSliceList, function(err, ret){
+						var gm = require('gm');
+
 						if(err){
 							grunt.fatal(err);
 							return callback(err);
