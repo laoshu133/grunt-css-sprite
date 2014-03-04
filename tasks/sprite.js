@@ -97,6 +97,9 @@ module.exports = function (grunt) {
 
 				if(coordData){
 					var newCss = css.replace(rurl, '('+ spriteImg +')');
+					if(!newCss.match(/;\s*$/)) {
+						newCss += ';'; //Add a semicolon if needed
+					}
 					newCss += ' background-position:-'+ coordData.x +'px -'+ coordData.y +'px;';
 					cssData = cssData.replace(css, newCss);
 				}
