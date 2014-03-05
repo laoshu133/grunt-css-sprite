@@ -125,7 +125,7 @@
 
 ### 可选依赖
 
-`grunt-css-sprite` 使用 [spritesmith](https://github.com/Ensighten/spritesmith) 作为内部核心算法，根据官方文档中提到的[基本依赖](https://github.com/Ensighten/spritesmith#requirements)
+`grunt-css-sprite` 使用 [spritesmith](https://github.com/Ensighten/spritesmith) 作为内部核心实现
 
 经 [Mark](https://github.com/jsmarkus) 提醒，之前对于`gm` 的依赖纯属多余；如果你需要将图片处理引擎切换为`gm`或者其他引擎，请手动安装对应的依赖包。
 举例 [Graphics Magick(gm)](http://www.graphicsmagick.org/) 依赖的安装流程：
