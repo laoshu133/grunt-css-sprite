@@ -9,28 +9,48 @@ module.exports = function (grunt) {
 		var done = this.async();
 
 		var options = this.options({
-			// 默认使用GM图像处理引擎
-			engine: 'gm',
-			// 默认使用二叉树最优排列算法
-			algorithm: 'binary-tree',
-			// 各图片间间距，默认 0
-			padding: 0,
 			// sprite背景图源文件夹，只有匹配此路径才会处理，默认 images/slice/
 			imagepath: 'images/slice/',
 			// 雪碧图输出目录，注意，会覆盖之前文件！默认 images/
 			spritedest: 'images/',
-			// 是否以时间戳为文件名生成新的雪碧图文件，如果启用请注意清理之前生成的文件，默认不生成新文件
-			newsprite: false,
 			// 替换后的背景路径，默认 ../images/
 			spritepath: '../images/',
+			// 各图片间间距，如果设置为奇数，会强制+1以保证生成的2x图片为偶数宽高，默认 0
+			padding: 0,
+			// 是否以时间戳为文件名生成新的雪碧图文件，如果启用请注意清理之前生成的文件，默认不生成新文件
+			newsprite: false,
 			// 给雪碧图追加时间戳，默认不追加
 			spritestamp: false,
 			// 在CSS文件末尾追加时间戳，默认不追加
-			cssstamp: false
+			cssstamp: false,
+			// 默认使用二叉树最优排列算法
+			algorithm: 'binary-tree',
+			// 默认使用`pngsmith`图像处理引擎
+			engine: 'pngsmith'
 		});
+
+		// `padding` must be even
+		if(options.padding % 2 !== 0){
+			options.padding += 1;
+		}
 
 		function fixPath(path){
 			return String(path).replace(/\\/g, '/').replace(/\/$/, '');
+		}
+
+		function createSprite(list, callback){
+			spritesmith({
+				algorithm: options.algorithm,
+				padding: options.padding,
+				engine: options.engine,
+				src: list
+			}, function(err, ret){
+				if(err){
+					return callback(err);
+				}
+
+				callback(null, ret);
+			});
 		}
 
 		function getSliceData(cssPath, cssData){
@@ -68,23 +88,9 @@ module.exports = function (grunt) {
 			};
 		}
 
-		function createSprite(list, callback){
-			spritesmith({
-				algorithm: options.algorithm,
-				padding: options.padding,
-				engine: options.engine,
-				src: list
-			}, function(err, ret){
-				if(err){
-					return callback(err);
-				}
-
-				callback(null, ret);
-			});
-		}
-
 		function replaceCSS(cssData, sliceData, coords){
 			var 
+			rsemicolon = /;\s*$/,
 			rurl = /\((["\']?)([^\)]+)\1\)/i,
 			spriteImg = options.spritepath + path.basename(sliceData.destImg) + sliceData.destImgStamp,
 			cssHash = sliceData.cssHash,
@@ -95,8 +101,9 @@ module.exports = function (grunt) {
 
 				if(coordData){
 					var newCss = css.replace(rurl, '('+ spriteImg +')');
-					if(!newCss.match(/;\s*$/)) {
-						newCss += ';'; //Add a semicolon if needed
+					// Add a semicolon if needed
+					if(!rsemicolon.test(newCss)){
+						newCss += ';';
 					}
 					newCss += ' background-position:-'+ coordData.x +'px -'+ coordData.y +'px;';
 					cssData = cssData.replace(css, newCss);
@@ -147,7 +154,7 @@ module.exports = function (grunt) {
 			cssProps = [],
 			lastInx = -1;
 
-			//规避 a[href*='}{']::after{ content:'}{';} 这类奇葩CSS
+			// 规避 a[href*='}{']::after{ content:'}{';} 这类奇葩CSS
 			cssData = cssData.replace(/[:=]\s*([\'\"]).*?\1/g, function(a){
 				return a.replace(/\}/g, '');
 			});
@@ -173,7 +180,7 @@ module.exports = function (grunt) {
 				cssProps[selectorInx] = selector + '{ background-position:-';
 				cssProps[selectorInx] += (posData.x/2) + 'px -' + (posData.y/2) + 'px;}';
 
-				//剔除重复选择器，并且保证选择器顺序
+				// 剔除重复选择器，并且保证选择器顺序
 				selectorInx = cssSelectorHash[selector];
 				if(isFinite(selectorInx)){
 					cssSelectorHash[selector] = --lastInx;
@@ -185,7 +192,7 @@ module.exports = function (grunt) {
 				}
 			});
 
-			//http://w3ctech.com/p/1430
+			// http://w3ctech.com/p/1430
 			retinaCss += '@media only screen and (-o-min-device-pixel-ratio: 3/2), only screen and (min--moz-device-pixel-ratio: 1.5), only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min-resolution: 240dpi), only screen and (min-resolution: 2dppx) {\n';
 
 			retinaCss += cssSelectors.join(',');
@@ -247,35 +254,29 @@ module.exports = function (grunt) {
 				// 处理 retina
 				var destRetinaImg = sliceData.destRetinaImg = destImg.replace(/\.png$/, '@2x.png');
 				sliceData = getRetinaSliceData(cssData, sliceData);
-				
+
 				if(sliceData.retinaSliceList && sliceData.retinaSliceList.length){
 					createSprite(sliceData.retinaSliceList, function(err, ret){
-						var gm = require('gm');
-
 						if(err){
 							grunt.fatal(err);
 							return callback(err);
 						}
 
-						// 写入Retina图片
+						// Generate retina image
 						grunt.file.write(destRetinaImg, ret.image, { encoding: 'binary' });
-						gm(destRetinaImg).size(function(err, size){
-							if(err){
-								grunt.fatal(err);
-								return callback(err);
-							}
+						grunt.log.writelns(('Done! [Created] -> ' + destRetinaImg));
 
-							if(size.width % 2 > 0 || size.height % 2 > 0){
-								grunt.fail.warn('警告：所有的雪碧图icon尺寸必须是偶数的！请检查！');
-							}
-							grunt.log.writelns(('Done! [Created] -> ' + destRetinaImg));
+						// Check retina image size
+						var size = sliceData.retinaSpriteSize = ret.properties;
+						if(size.width % 2 > 0 || size.height % 2 > 0){
+							grunt.fail.warn('警告：所有的雪碧图icon尺寸必须是偶数的！请检查！');
+						}
 
-							sliceData.retinaSpriteSize = size;
-							newCssData += getRetinaCSS(cssData, sliceData, ret.coordinates);
-							doneSprite(newCssData, destCSS);
+						// Retina CSS
+						newCssData += getRetinaCSS(cssData, sliceData, ret.coordinates);
 
-							callback(null);
-						});
+						doneSprite(newCssData, destCSS);
+						callback(null);
 					});
 				}
 				else{
