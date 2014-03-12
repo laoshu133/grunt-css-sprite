@@ -158,6 +158,8 @@
 
 `0.0.7` 修正`backgroun[-image]`之后缺少分号时造成新生成的CSS出错，修改默认处理引擎为`pngsmith`，取消对`gm`的依赖
 
+`0.0.8` 修正`getSliceData`获取所有CSS背景属性正则匹配
+
 ### 致谢
 
 感谢 [spritesmith](https://github.com/Ensighten/spritesmith)

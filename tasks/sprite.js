@@ -56,7 +56,7 @@ module.exports = function (grunt) {
 		function getSliceData(cssPath, cssData){
 			var 
 			slicePath = fixPath(options.imagepath),
-			rbgs = /background(?:-image)?\s*:[\s\S]*?url\((["\']?)(?!https?|\/)?[^\)]+\1\)[^};]*;?/ig,
+			rbgs = /background(?:-image)?\s*:[^;]*?url\((["\']?)(?!https?|\/)?[^\)]+\1\)[^};]*;?/ig,
 			rurl = /\((["\']?)([^\)]+)\1\)/i,
 			cssList = cssData.match(rbgs),
 			sliceHash = {},
