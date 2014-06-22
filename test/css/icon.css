@@ -27,7 +27,7 @@ a[href*='}{']::after{ content:'}{';}
 .iocn_ext5{ background:#fff url(../slice/icon_wait.png) no-repeat;}
 
 .iocn_ext7{ background-image:url(/slice/icon_wait.png);}
-.iocn_ext8{ background-image:url(http://127.0.0.1/slice/icon_wait.png);}
+.iocn_ext8{ background-image:url(/w/grunt-css-sprite/test/slice/icon_wait.png);}
 
 .iocn_ext9{
 	/* multi-line test */

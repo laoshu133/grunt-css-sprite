@@ -19,27 +19,38 @@ module.exports = function (grunt) {
 		return String(path).replace(/\\/g, '/').replace(/\/$/, '');
 	}
 
-	function getSliceData(src, slicePath) {
+	function getSliceData(src, options) {
 		var 
 		cssPath = path.dirname(src),
 		cssData = grunt.file.read(src),
 		rabsUrl = /^(\/|https?:|file:)/i,
-		rbgs = /background(?:-image)?\s*:[^;]*?url\((["\']?)([^\)]+)\1\)[^};]*;?/ig;
+		rbgs = /background(?:-image)?\s*:[^;]*?url\((["\']?)([^\)]+)\1\)[^};]*;?/ig,
+		slicePath = fixPath(options.imagepath),
+		slicePathMap = options.imagepath_map,
+		_slicePathMap = slicePathMap;
+
+		// map imagepath
+		if(Array.isArray(slicePathMap)) {
+			slicePathMap = function(uri) {
+				return String(uri).replace(_slicePathMap[0], _slicePathMap[1]);
+			};
+		}
 
 		var cssList = [], cssHash = {}, cssInx = 0;
 		var imgList = [], imgHash = {}, imgInx = 0;
 
-		slicePath = fixPath(slicePath);
-
 		cssData = cssData.replace(rbgs, function(css, b, uri) {
+			var imgUri = uri;
+			if(typeof slicePathMap === 'function') {
+				imgUri = slicePathMap(imgUri);
+			}
+
 			// filter absolute path
-			if(rabsUrl.test(uri)) {
+			if(rabsUrl.test(imgUri)) {
 				return css;
 			}
 
-			var 
-			imgFullPath = fixPath(path.join(cssPath, uri)),
-			imgPath = path.basename(imgFullPath);
+			var imgFullPath = fixPath(path.join(cssPath, imgUri));
 
 			if(
 				// low call grunt.file.exists
@@ -100,6 +111,8 @@ module.exports = function (grunt) {
 		var options = this.options({
 			// sprite背景图源文件夹，只有匹配此路径才会处理，默认 images/slice/
 			imagepath: 'images/slice/',
+			// 映射CSS中背景路径，支持函数和数组，默认为 null
+			imagepath_map: null,
 			// 雪碧图输出目录，注意，会覆盖之前文件！默认 images/
 			spritedest: 'images/',
 			// 替换后的背景路径，默认 ../images/
@@ -137,7 +150,7 @@ module.exports = function (grunt) {
 			var 
 			src = file.src[0],
 			cssDest = file.dest,
-			sliceData = getSliceData(src, options.imagepath),
+			sliceData = getSliceData(src, options),
 			cssList = sliceData.cssList;
 
 			if(!cssList || cssList.length <= 0) {
@@ -224,8 +237,8 @@ module.exports = function (grunt) {
 
 					sliceData.cssList.forEach(function(cssItem, id) {
 						var 
-						extName = path.extname(cssItem.imgPath),
-						filename = path.basename(cssItem.imgPath, extName),
+						extName = path.extname(cssItem.imgFullPath),
+						filename = path.basename(cssItem.imgFullPath, extName),
 						retinaImgFullPath = path.join(path.dirname(cssItem.imgFullPath), filename + '@2x' + extName);
 
 						if(!retinaImgHash[retinaImgFullPath] && grunt.file.exists(retinaImgFullPath)) {
