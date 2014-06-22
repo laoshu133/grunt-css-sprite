@@ -18,6 +18,8 @@ module.exports = function(grunt){
 				spritepath: '../images/',
 				// 各图片间间距，如果设置为奇数，会强制+1以保证生成的2x图片为偶数宽高，默认 0
 				padding: 2,
+				// 是否使用 image-set 作为2x图片实现，默认不使用
+				useimageset: false,
 				// 是否以时间戳为文件名生成新的雪碧图文件，如果启用请注意清理之前生成的文件，默认不生成新文件
 				newsprite: false,
 				// 给雪碧图追加时间戳，默认不追加
@@ -42,10 +44,30 @@ module.exports = function(grunt){
 					// 导出的css名
 					ext: '.sprite.css'
 				}]
+			},
+			// image-set 示例
+			imageSetSprite: {
+				options: {
+					useimageset: true,
+					spritedest: 'test/publish/images/imageset/',
+					spritepath: '../../images/imageset/',
+				},
+				files: [{
+					//启用动态扩展
+					expand: true,
+					// css文件源的文件夹
+					cwd: 'test/css/',
+					// 匹配规则
+					src: '*.css',
+					//导出css和sprite的路径地址
+					dest: 'test/publish/css/imageset/',
+					// 导出的css名
+					ext: '.imageset.css'
+				}]
 			}
 		},
 		jshint: {
-			all: [ 'Gruntfile.js', 'tasks/*.js' ]
+			all: [ 'Gruntfile.js', 'lib/*.js', 'tasks/*.js' ]
 		}
 	});
 

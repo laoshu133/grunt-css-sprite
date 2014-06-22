@@ -6,11 +6,13 @@
 其灵感来源 `grunt-sprite`，由于其配置参数限制目录结构等，不能满足通用项目需求，现重新造轮子发布；
 它的主要功能是：
 
-1. 使用二叉树排列算法，对css文件进行处理，收集切片序列，生成雪碧图
+1. 对css文件进行处理，收集切片序列，生成雪碧图
 2. 在原css代码中为切片添加`background-position`属性
 3. 生成用于高清设备的高清雪碧图，并在css文件末尾追加媒体查询代码
+4. 支持 `image-set` 配置高清雪碧图
 4. 在引用雪碧图的位置打上时间戳
 5. 在样式末尾追加时间戳
+6. 按照时间戳命名文件
 
   
 ### 配置说明
@@ -26,6 +28,8 @@
             spritepath: '../images/',
             // 各图片间间距，如果设置为奇数，会强制+1以保证生成的2x图片为偶数宽高，默认 0
             padding: 2,
+            // 是否使用 image-set 作为2x图片实现，默认不使用
+			useimageset: false,
             // 是否以时间戳为文件名生成新的雪碧图文件，如果启用请注意清理之前生成的文件，默认不生成新文件
             newsprite: false,
             // 给雪碧图追加时间戳，默认不追加
@@ -60,16 +64,19 @@
 * **options**
 
     * `imagepath` 
-        必选项，sprite背景图源文件夹，只有匹配此路径才会处理，默认 images/slice/
+        必填项，sprite背景图源文件夹，只有匹配此路径才会处理，默认 images/slice/
         
     * `spritedest` 
-        必选项，雪碧图输出目录，注意，会覆盖之前文件！默认 images/
+        必填项，雪碧图输出目录，注意，会覆盖之前文件！默认 images/
         
     * `spritepath` 
-        必选项，替换后的背景路径，默认 ../images/
+        必填项，替换后的背景路径，默认 ../images/
 
     * `padding` 
         可选项，指定各图片间间距，默认 0
+	
+	* `useimageset` 
+        可选项，是否使用 image-set 作为2x图片实现，默认不使用
 
     * `newsprite` 
         可选项，是否以时间戳为文件名生成新的雪碧图文件，如果启用请注意清理之前生成的文件，默认不生成新文件
@@ -84,7 +91,7 @@
         可选项，指定图像处理引擎，默认选择`pngsmith`
 
     * `algorithm` 
-        可选项，指定排列方式，有`top-down` （从上至下）, `left-right`（从左至右）, `diagonal`（从左上至右下）, `alt-diagonal` （从左下至右上）和 `binary-tree`（二叉树排列） 五种供选择，默认binary-tree
+        可选项，指定排列方式，有`top-down` （从上至下）, `left-right`（从左至右）, `diagonal`（从左上至右下）, `alt-diagonal` （从左下至右上）和 `binary-tree`（二叉树排列） 五种供选择，默认 `binary-tree`；参考 [Layout](https://github.com/twolfson/layout/)
 
 ### 载入插件
 
@@ -96,21 +103,21 @@
 
 有一个类似这样的目录结构：
         
-        ├── test/                
-            ├── css/    
-                └── icon.css        
-            ├── images/    
-                ├── slice/    
-                    ├── icon-a.png
-                    ├── icon-a@2x.png        
-                    ├── icon-b.png
-                    └── icon-b@2x.png
-            └── publish/
-                ├── css/
-                    └── icon.sprite.css
-                └── images/    
-                    ├── icon.png
-                    └── icon@2x.png
+    ├── test/                
+        ├── css/    
+            └── icon.css        
+        ├── images/    
+            ├── slice/    
+                ├── icon-a.png
+                ├── icon-a@2x.png        
+                ├── icon-b.png
+                └── icon-b@2x.png
+        └── publish/
+            ├── css/
+                └── icon.sprite.css
+            └── images/    
+                ├── icon.png
+                └── icon@2x.png
         
 `css/icon.css` 调用`images/slice/`目录下的切片，`grunt-css-sprite` 会将 `css/icon.css` 进行处理。
 
@@ -122,6 +129,7 @@
 2. 仅当CSS中定义`url(xxxx)`的路径匹配参数`imagepath`才进行处理，和具体`background`，`background-image`CSS无关，这里有区别于`grunt-sprite`
 3. 理论上高清切片都应该是源切片尺寸的2倍，所以所有高清切片的尺寸宽和高都必须是偶数
 4. 理论上所有的切片都应该是`.png`格式，`png8` `png24` 和 `png32`不限
+5. `spritesmith` 默认只支持png格式，如果有其他格式需要，请参考 *可选依赖*
 
 ### 可选依赖
 
@@ -160,6 +168,8 @@
 
 `0.0.8` 修正`getSliceData`获取所有CSS背景属性正则匹配
 
+`0.0.9` 重构操作流程，添加 `image-set` 支持
+
 ### 致谢
 
 感谢 [spritesmith](https://github.com/Ensighten/spritesmith)
@@ -167,3 +177,5 @@
 感谢 [Meters](https://github.com/hellometers)
 
 感谢 [Mark](https://github.com/jsmarkus) 修正 [#1](https://github.com/laoshu133/grunt-css-sprite/pull/1)，提出 [#2](https://github.com/laoshu133/grunt-css-sprite/pull/2) 
+
+> 如果使用中有任何问题，请提交 [Issue](https://github.com/laoshu133/grunt-css-sprite/issues) 或者 [与我联系](http://www.laoshu133.com)
