@@ -1,7 +1,7 @@
 {
   "name": "grunt-css-sprite",
   "description": "A grunt plugin to help front engineer creating css sprite.",
-  "version": "0.0.8",
+  "version": "0.1.0",
   "homepage": "https://github.com/laoshu133/grunt-css-sprite",
   "author": {
     "name": "mikongge",
@@ -33,7 +33,8 @@
   },
   "devDependencies": {
     "grunt": "~0.4.1",
-    "grunt-contrib-jshint": "~0.8.0"
+    "grunt-contrib-jshint": "~0.8.0",
+    "async": "^0.9.0"
   },
   "peerDependencies": {
     "grunt": "~0.4.1"

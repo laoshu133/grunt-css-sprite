@@ -1,9 +1,86 @@
 var 
 spritesmith = require('spritesmith'),
+async = require('async'),
 path = require('path');
 
 module.exports = function (grunt) {
 	"use strict";
+
+	var SLICE_PLACE = '{{$slice_{id}$}}';
+	var R_SLICE_PLACE = /\{\{\$slice_(\d+)\$\}\}/g;
+
+	function fixPath(path) {
+		return String(path).replace(/\\/g, '/').replace(/\/$/, '');
+	}
+
+	function getSliceData(src, slicePath) {
+		var 
+		cssPath = path.dirname(src),
+		cssData = grunt.file.read(src),
+		rabsUrl = /^(\/|https?:|file:)/i,
+		rbgs = /background(?:-image)?\s*:[^;]*?url\((["\']?)([^\)]+)\1\)[^};]*;?/ig;
+
+		var cssList = [], cssHash = {}, cssInx = 0;
+		var imgList = [], imgHash = {}, imgInx = 0;
+
+		slicePath = fixPath(slicePath);
+
+		cssData = cssData.replace(rbgs, function(css, b, uri) {
+			if(rabsUrl.test(uri)) {
+				return css;
+			}
+
+			var 
+			imgFullPath = fixPath(path.join(cssPath, uri)),
+			imgPath = path.basename(imgFullPath);
+
+			if(!imgHash[imgFullPath] && !grunt.file.exists(imgFullPath)) {
+				return css;
+			}
+
+			var currCssInx = cssHash[css];
+			if(currCssInx == null) {
+				currCssInx = cssHash[css] = cssInx;
+
+				cssList[cssInx++] = {
+					imgFullPath: imgFullPath,
+					imgPath: uri,
+					css: css
+				};
+			}
+
+			if(!imgHash[imgFullPath]) {
+				imgList[imgInx++] = imgFullPath;
+				imgHash[imgFullPath] = true;
+			}
+
+			return SLICE_PLACE.replace('{id}', currCssInx);
+		});
+
+		return {
+			cssData: cssData,
+			cssList: cssList,
+			cssHash: cssHash,
+			imgList: imgList,
+			imgHash: imgHash
+		};
+	}
+
+	function createSprite(list, options, callback) {
+        spritesmith({
+            algorithm: options.algorithm,
+            padding: options.padding,
+            engine: options.engine,
+            src: list
+        }, function(err, ret) {
+            if(err) {
+                return callback(err);
+            }
+
+            callback(null, ret);
+        });
+    }
+
 
 	grunt.registerMultiTask('sprite', 'Create sprite image with slices and update the CSS file.', function () {
 		var done = this.async();
@@ -17,6 +94,8 @@ module.exports = function (grunt) {
 			spritepath: '../images/',
 			// 各图片间间距，如果设置为奇数，会强制+1以保证生成的2x图片为偶数宽高，默认 0
 			padding: 0,
+			// 是否使用 image-set 作为2x图片实现，默认不使用
+			useimageset: false,
 			// 是否以时间戳为文件名生成新的雪碧图文件，如果启用请注意清理之前生成的文件，默认不生成新文件
 			newsprite: false,
 			// 给雪碧图追加时间戳，默认不追加
@@ -34,260 +113,224 @@ module.exports = function (grunt) {
 			options.padding += 1;
 		}
 
-		function fixPath(path){
-			return String(path).replace(/\\/g, '/').replace(/\/$/, '');
-		}
-
-		function createSprite(list, callback){
-			spritesmith({
-				algorithm: options.algorithm,
-				padding: options.padding,
-				engine: options.engine,
-				src: list
-			}, function(err, ret){
-				if(err){
-					return callback(err);
-				}
-
-				callback(null, ret);
-			});
-		}
-
-		function getSliceData(cssPath, cssData){
-			var 
-			slicePath = fixPath(options.imagepath),
-			rbgs = /background(?:-image)?\s*:[^;]*?url\((["\']?)(?!https?|\/)?[^\)]+\1\)[^};]*;?/ig,
-			rurl = /\((["\']?)([^\)]+)\1\)/i,
-			cssList = cssData.match(rbgs),
-			sliceHash = {},
-			sliceList = [],
-			cssHash = {},
-			inx = 0;
-
-			if(cssList && cssList.length){
-				cssList.forEach(function(css){
-					var 
-					url = css.match(rurl)[2],
-					imgName = path.basename(url),
-					imgPath = path.join(cssPath, path.dirname(url)),
-					imgFullPath = fixPath(path.join(imgPath, imgName));
-
-					if(!sliceHash[imgFullPath] && fixPath(imgPath) === slicePath && grunt.file.exists(imgFullPath)){
-						sliceHash[imgFullPath] = true;
-						sliceList[inx++] = imgFullPath;
-					}
-					cssHash[css] = imgFullPath;
-				});
-			}
-
-			return {
-				sliceHash: sliceHash,
-				sliceList: sliceList,
-				cssHash: cssHash,
-				cssList: cssList
-			};
-		}
-
-		function replaceCSS(cssData, sliceData, coords){
-			var 
-			rsemicolon = /;\s*$/,
-			rurl = /\((["\']?)([^\)]+)\1\)/i,
-			spriteImg = options.spritepath + path.basename(sliceData.destImg) + sliceData.destImgStamp,
-			cssHash = sliceData.cssHash,
-			cssList = sliceData.cssList;
-
-			cssList.forEach(function(css, inx){
-				var coordData = coords[cssHash[css]];
-
-				if(coordData){
-					var newCss = css.replace(rurl, '('+ spriteImg +')');
-					// Add a semicolon if needed
-					if(!rsemicolon.test(newCss)){
-						newCss += ';';
-					}
-					newCss += ' background-position:-'+ coordData.x +'px -'+ coordData.y +'px;';
-					cssData = cssData.replace(css, newCss);
-				}
-			});
-			return cssData;
-		}
-
-		function getRetinaSliceData(cssData, sliceData){
-			var 
-			retinaSliceHash = sliceData.retinaSliceHash = {},
-			retinaSliceList = sliceData.retinaSliceList = [],
-			retinaCssHash = sliceData.retinaCssHash = {},
-			retinaCssList = sliceData.retinaCssList = [],
-			cssHash = sliceData.cssHash,
-			sliceInx = 0,
-			cssInx = 0;
-			sliceData.cssList.forEach(function(css){
-				var 
-				imgPath = cssHash[css],
-				extName = path.extname(imgPath),
-				fileName = path.basename(imgPath, extName);
-				imgPath = fixPath(path.join(path.dirname(imgPath), fileName + '@2x' + extName));
-				
-				if(!retinaSliceHash[imgPath] && grunt.file.exists(imgPath)){
-					retinaSliceHash[imgPath] = true;
-					retinaSliceList[sliceInx++] = imgPath;
-				}
-
-				if(retinaSliceHash[imgPath]){
-					retinaCssList[cssInx++] = css;
-					retinaCssHash[css] = imgPath;
-				}
-			});
-			return sliceData;
-		}
-
-		function getRetinaCSS(cssData, sliceData, coords){
-			var 
-			rreEscape = /[-\/\\^$*+?.()|[\]{}]/g,
-			retinaCssHash = sliceData.retinaCssHash,
-			spriteFilename = path.basename(sliceData.destRetinaImg),
-			bgWidth = Math.floor(sliceData.retinaSpriteSize.width / 2),
-			spriteImg = options.spritepath + spriteFilename + sliceData.destImgStamp,
-			retinaCss = '\n\n/* '+ spriteFilename + ' */\n',
-			cssSelectorHash = {},
-			cssSelectors = [],
-			cssProps = [],
-			lastInx = -1;
-
-			// 规避 a[href*='}{']::after{ content:'}{';} 这类奇葩CSS
-			cssData = cssData.replace(/[:=]\s*([\'\"]).*?\1/g, function(a){
-				return a.replace(/\}/g, '');
-			});
-
-			sliceData.retinaCssList.forEach(function(css){
-				var 
-				selector,
-				selectorInx,
-				posData = coords[retinaCssHash[css]],
-				rselector = new RegExp('([^}\\n\\/]+)\\{[^\\}]*?' + css.replace(rreEscape, '\\$&'));
-				
-				if(posData){
-					cssData = cssData.replace(rselector, function(a, b){
-						selector = b;
-						return b + '{';
-					});
-				}
-
-				if(!selector){ return; }
-
-				selectorInx = ++lastInx;
-				cssSelectors[selectorInx] = selector;
-				cssProps[selectorInx] = selector + '{ background-position:-';
-				cssProps[selectorInx] += (posData.x/2) + 'px -' + (posData.y/2) + 'px;}';
-
-				// 剔除重复选择器，并且保证选择器顺序
-				selectorInx = cssSelectorHash[selector];
-				if(isFinite(selectorInx)){
-					cssSelectorHash[selector] = --lastInx;
-					cssSelectors.splice(selectorInx, 1);
-					cssProps.splice(selectorInx, 1);
-				}
-				else{
-					cssSelectorHash[selector] = lastInx;
-				}
-			});
-
-			// http://w3ctech.com/p/1430
-			retinaCss += '@media only screen and (-o-min-device-pixel-ratio: 3/2), only screen and (min--moz-device-pixel-ratio: 1.5), only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min-resolution: 240dpi), only screen and (min-resolution: 2dppx) {\n';
-
-			retinaCss += cssSelectors.join(',');
-			retinaCss += '{ background-image:url('+ spriteImg +'); background-size:' + bgWidth + 'px auto;}\n';
-			retinaCss += cssProps.join('\n');
-			retinaCss += '\n}\n';
-			return retinaCss;
-		}
-
-		function doneSprite(cssData, destCSS){
-			if(options.cssstamp){
-				var timeNow = grunt.template.today('yyyymmddHHmmss');
-				cssData += '\n.TmTStamp{ content:\''+ timeNow +'\'}';
-			}
-			grunt.file.write(destCSS, cssData);
-			grunt.log.writelns(('Done! [Created] -> ' + destCSS));
-		}
-
-		function spriteIterator(file, callback){
+		async.each(this.files, function(file, callback) {
 			var 
 			src = file.src[0],
-			fileName = path.basename(src, '.css'),
-			timeNow = grunt.template.today('yyyymmddHHmmss');
+			cssDest = file.dest,
+			sliceData = getSliceData(src, options.imagepath),
+			cssList = sliceData.cssList;
 
-			if(options.newsprite){
-				fileName += '-' + timeNow;
+			if(!cssList || cssList.length <= 0) {
+				grunt.file.copy(src, cssDest);
+                grunt.log.writelns(('Done! [Copied] -> ' + cssDest));
+                return callback(null);
 			}
 
-			var 
-			destCSS = file.dest,
-			cssData = grunt.file.read(src),
-			sliceData = getSliceData(path.dirname(src), cssData),
-			sliceList = sliceData.sliceList;
+			async.waterfall([
+				// create sprite image
+				function createSpriteImg(cb) {
+					createSprite(sliceData.imgList, options, cb);
+				},
+				// write sprite image file
+				function writeSrpiteFile(spriteImgData, cb) {
+		            // cssFilename, timestamp
+		            var 
+		            cssFilename = path.basename(src, '.css'),
+		            timeNow = grunt.template.today('yyyymmddHHmmss');
 
-			// sprite 目标位置 & 时间戳
-			var destImg = sliceData.destImg = fixPath(path.join(options.spritedest, fileName + '.png'));
-			sliceData.destImgStamp = options.spritestamp ? '?' + timeNow : '';
+		            if(options.newsprite){
+		                cssFilename += '-' + timeNow;
+		            }
 
-			if(!sliceList || !sliceList.length){
-				grunt.file.copy(src, destCSS);
-				grunt.log.writelns(('Done! [Copied] -> ' + destCSS));
-				return callback(null);
-			}
+		            sliceData.cssFilename = cssFilename;
+		            sliceData.timestamp = options.spritestamp ? ('?'+timeNow) : '';
 
-			// 生成sprite
-			createSprite(sliceList, function(err, ret){
-				if(err){
-					grunt.fatal(err);
-					return callback(null);
-				}
+		            // write file
+		            var imgDest = sliceData.imgDest = path.join(options.spritedest, cssFilename + '.png');
 
-				// 写入图片
-				grunt.file.write(destImg, ret.image, { encoding: 'binary' });
-				grunt.log.writelns(('Done! [Created] -> ' + destImg));
+		            sliceData.destImgStamp = options.spritestamp ? '?' + timeNow : '';
 
-				// 替换CSS
-				var newCssData = replaceCSS(cssData, sliceData, ret.coordinates);
+	                grunt.file.write(imgDest, spriteImgData.image, { encoding: 'binary' });
+	                grunt.log.writelns(('Done! [Created] -> ' + imgDest));
 
-				// 处理 retina
-				var destRetinaImg = sliceData.destRetinaImg = destImg.replace(/\.png$/, '@2x.png');
-				sliceData = getRetinaSliceData(cssData, sliceData);
+	                cb(null, spriteImgData.coordinates);
+				},
+				// set slice position
+				function setSlicePosition(coords, cb) {
+					var 
+					rsemicolon = /;\s*$/,
+					spriteFilename = path.basename(sliceData.imgDest),
+					spriteImg = path.join(options.spritepath + spriteFilename) + sliceData.destImgStamp;
 
-				if(sliceData.retinaSliceList && sliceData.retinaSliceList.length){
-					createSprite(sliceData.retinaSliceList, function(err, ret){
-						if(err){
-							grunt.fatal(err);
-							return callback(err);
-						}
+					sliceData.cssList.forEach(function(cssItem) {
+						var 
+						css = cssItem.css,
+						coord = coords[cssItem.imgFullPath];
 
-						// Generate retina image
-						grunt.file.write(destRetinaImg, ret.image, { encoding: 'binary' });
-						grunt.log.writelns(('Done! [Created] -> ' + destRetinaImg));
+						css = css.replace(cssItem.imgPath, spriteImg);
 
-						// Check retina image size
-						var size = sliceData.retinaSpriteSize = ret.properties;
-						if(size.width % 2 > 0 || size.height % 2 > 0){
-							grunt.fail.warn('警告：所有的雪碧图icon尺寸必须是偶数的！请检查！');
-						}
+						// Add a semicolon if needed
+	                    if(!rsemicolon.test(css)){
+	                        css += ';';
+	                    }
+						css += ' background-position:-'+ coord.x +'px -'+ coord.y +'px;';
 
-						// Retina CSS
-						newCssData += getRetinaCSS(cssData, sliceData, ret.coordinates);
-
-						doneSprite(newCssData, destCSS);
-						callback(null);
+						cssItem.newCss = css;
 					});
-				}
-				else{
-					doneSprite(newCssData, destCSS);
-					callback(null);
-				}
-			});
-		}
 
-		grunt.util.async.forEachSeries(this.files, spriteIterator, function(success){
-			done(success);
+					cb(null);
+				},
+				// get retina image
+				function getRetinaImg(cb) {
+					if(options.useimageset) {
+						return cb(null, null);
+					}
+
+					var 
+					retinaImgList = sliceData.retinaImgList = [],
+					retinaImgHash = sliceData.retinaImgHash = {};
+
+					sliceData.cssList.forEach(function(cssItem, id) {
+						var 
+						extName = path.extname(cssItem.imgPath),
+						filename = path.basename(cssItem.imgPath, extName),
+						retinaImgFullPath = path.join(path.dirname(cssItem.imgFullPath), filename + '@2x' + extName);
+
+						if(retinaImgHash[retinaImgFullPath] == null && grunt.file.exists(retinaImgFullPath)) {
+							retinaImgHash[retinaImgFullPath] = id;
+							cssItem.retinaImgFullPath = retinaImgFullPath;
+
+							retinaImgList.push(retinaImgFullPath);
+						}
+					});
+
+					if(retinaImgList.length > 0) {
+						return createSprite(retinaImgList, options, cb);
+					}
+
+					cb(null, null);
+				},
+				// write retina sprite image file
+				function writeRetinaeImgFile(retinaSpriteImgData, cb) {
+					if(retinaSpriteImgData) {
+						sliceData.retinaSpriteImgData = retinaSpriteImgData;
+
+						var retinaImgDest = sliceData.imgDest.replace(/\.png$/, '@2x.png');
+
+						sliceData.retinaImgDest = retinaImgDest;
+
+                        grunt.file.write(retinaImgDest, retinaSpriteImgData.image, { encoding: 'binary' });
+                        grunt.log.writelns(('Done! [Created] -> ' + retinaImgDest));
+					}
+
+					cb(null);
+				},
+				// replace css
+				function replaceCss(cb) {
+					var 
+					cssList = sliceData.cssList,
+					retinaSpriteImgData = sliceData.retinaSpriteImgData,
+					coords = retinaSpriteImgData ? retinaSpriteImgData.coordinates : {};
+
+				    var 
+				    cssData = sliceData.cssData,
+				    // a[href*='}{']::after{ content:'}{';} 规避此类奇葩CSS
+				    tmpCss = cssData.replace(/[:=]\s*([\'\"]).*?\1/g, function(a){
+				        return a.replace(/\}/g, '');
+				    });
+
+					var 
+					rreEscape = /[-\/\\^$*+?.()|[\]{}]/g,
+					cssSelectorHash = {},
+					cssSelectors = [],
+					cssProps = [],
+					lastInx = -1;
+
+					sliceData.cssData = cssData.replace(R_SLICE_PLACE, function(place, id) {
+						var 
+						cssItem = cssList[parseInt(id, 10)],
+						ret = cssItem ? cssItem.newCss : '';
+
+						if(!cssItem) {
+							return ret;
+						}
+
+						var coordData = coords[cssItem.retinaImgFullPath];
+						if(!coordData || !cssItem.retinaImgFullPath) {
+							return ret;
+						}
+
+						// media query retina css
+						var 
+						selector,
+						place = SLICE_PLACE.replace('{id}', id),
+						rselector = new RegExp('([^}\\n\\/]+)\\{[^\\}]*?' + place.replace(rreEscape, '\\$&'));
+						tmpCss =  tmpCss.replace(rselector, function(a, b) {
+							selector = b;
+							return b + '{';
+						});
+
+						if(!selector) {
+							return ret;
+						}
+
+						var selectorInx = ++lastInx;
+		                cssSelectors[selectorInx] = selector;
+		                cssProps[selectorInx] = selector + ' { background-position:-';
+		                cssProps[selectorInx] += (coordData.x/2) + 'px -' + (coordData.y/2) + 'px;}';
+
+		                // unique selector, and keep selector order
+		                selectorInx = cssSelectorHash[selector];
+		                if(isFinite(selectorInx)) {
+		                    cssSelectorHash[selector] = --lastInx;
+		                    cssSelectors.splice(selectorInx, 1);
+		                    cssProps.splice(selectorInx, 1);
+		                }
+		                else {
+		                    cssSelectorHash[selector] = lastInx;
+		                }
+
+						return ret;
+					});
+
+					if(retinaSpriteImgData) {
+						var 
+						spriteFilename = path.basename(sliceData.retinaImgDest),
+						bgWidth = Math.floor(retinaSpriteImgData.properties.width / 2),
+						spriteImg = path.join(options.spritepath + spriteFilename) + sliceData.destImgStamp;
+
+						var retinaCss = '\n\n/* '+ spriteImg + ' */\n';
+
+						// http://w3ctech.com/p/1430
+						retinaCss += '@media only screen and (-o-min-device-pixel-ratio: 3/2), only screen and (min--moz-device-pixel-ratio: 1.5), only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min-resolution: 240dpi), only screen and (min-resolution: 2dppx) {';
+
+						retinaCss += '\n  ';
+						retinaCss += cssSelectors.join(',\n  ');
+			            retinaCss += ' { background-image:url('+ spriteImg +'); background-size:' + bgWidth + 'px auto;}';
+			            retinaCss += '\n  ';
+			            retinaCss += cssProps.join('\n  ');
+			            retinaCss += '\n}\n';
+
+			            sliceData.cssData += retinaCss;
+					}
+
+					cb(null);
+				},
+				// write css file
+				function writeCssFile(cb) {
+					// timestamp
+					if(options.cssstamp) {
+						sliceData.cssData += '\n.css_stamp{ content:"'+ sliceData.timestamp.slice(1) +'";}';
+					}
+
+					grunt.file.write(cssDest, sliceData.cssData);
+            		grunt.log.writelns(('Done! [Created] -> ' + cssDest));
+
+					cb(null);
+				}
+			], callback);
+		}, function(ret) {
+			done(ret);
 		});
 	});
 };
