@@ -175,7 +175,7 @@
 
 `0.0.9` 重构操作流程，添加 `image-set` 支持
 
-`0.1.0` 添加 `image-prefix` 参数
+`0.1.0` 添加 `imagepath-map` 参数
 
 ### 致谢
 
@@ -185,4 +185,4 @@
 
 感谢 [Mark](https://github.com/jsmarkus) 修正 [#1](https://github.com/laoshu133/grunt-css-sprite/pull/1)，提出 [#2](https://github.com/laoshu133/grunt-css-sprite/pull/2) 
 
-> 如果使用中有任何问题，请提交 [Issue](https://github.com/laoshu133/grunt-css-sprite/issues) 或者 [与我联系](http://www.laoshu133.com)
+> 使用中有任何问题，请提交 [Issue](https://github.com/laoshu133/grunt-css-sprite/issues) 或 [与我联系](http://www.laoshu133.com)
