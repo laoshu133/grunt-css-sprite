@@ -1,20 +1,44 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <link rel="stylesheet" href="../publish/css/icon.sprite.css"/>
+    <link rel="stylesheet" href="../publish/css/icon.sprite.css" id="test_link" />
     <title>grunt-css-sprite Test</title>
+
+    <style type="text/css">
+    .test_btns, .test_panel { padding: 1em;}
+    </style>
 </head>
 <body>
-	<i class="icon icon_switch-off"></i>
-	<i class="icon icon_switch-on"></i>
-	<i class="icon icon_tip-error"></i>
-	<i class="icon icon_tip-ok"></i>
-	<i class="icon icon_tip-warn"></i>
-
-	<div class="ext_test">
-		<i class="icon iocn_ext2"></i>
-		<a href="#}{"><i class="icon icon_tip-ok"></i></a>
-		<span class="icon icon_tip-warn"></span>
+	<div class="test_btns" id="test_btns">
+		<button data-css="../publish/css/icon.sprite.css">Use Media Query for @2x</button>
+		<button data-css="../publish/css/imageset/icon.imageset.css">Use image-set for @2x</button>
 	</div>
+
+	<div class="test_panel">
+		<i class="icon icon_switch-off"></i>
+		<i class="icon icon_switch-on"></i>
+		<i class="icon icon_tip-error"></i>
+		<i class="icon icon_tip-ok"></i>
+		<i class="icon icon_tip-warn"></i>
+
+		<div class="ext_test">
+			<i class="icon iocn_ext2"></i>
+			<a href="#}{"><i class="icon icon_tip-ok"></i></a>
+			<span class="icon icon_tip-warn"></span>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+    (function() {
+    	document.getElementById('test_btns').onclick = function(e) {
+    		if(e.target.nodeName === 'BUTTON') {
+    			var cssUrl = e.target.getAttribute('data-css');
+    			cssUrl += '?' + (+new Date);
+
+    			document.getElementById('test_link').href = cssUrl;
+    		}
+    	};
+    })();
+    </script>
 </body>
 </html>
