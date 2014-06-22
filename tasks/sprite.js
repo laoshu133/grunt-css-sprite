@@ -10,6 +10,9 @@ module.exports = function (grunt) {
 	var R_SLICE_PLACE = /\{\{\$slice_(\d+)\$\}\}/g;
 	var IMAGE_SET_PLACE = '/*image-set-place*/';
 	var IMAGE_SET_CSS_TMPL = 'background-image: -webkit-image-set(url({spriteImg}) 1x, url({retinaSpriteImg}) 2x); background-image: -moz-image-set(url({spriteImg}) 1x, url({retinaSpriteImg}) 2x); background-image: -ms-image-set(url({spriteImg}) 1x, url({retinaSpriteImg}) 2x); background-image: image-set(url({spriteImg}) 1x, url({retinaSpriteImg}) 2x);';
+	var IMAGE_SET_PLACE_FILE_BEFORE = '__@__css_sprite_place_before.png';
+	var IMAGE_SET_PLACE_FILE_END = '__@__css_sprite_place_end.png';
+	var IMAGE_SET_PLACE_FILE = './lib/place.png';
 	var MEDIA_QUERY_CSS_TMPL = '\n\n/* {imgDest} */\n@media only screen and (-o-min-device-pixel-ratio: 3/2), only screen and (min--moz-device-pixel-ratio: 1.5), only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min-resolution: 240dpi), only screen and (min-resolution: 2dppx) {\n  {cssText}\n}\n';
 
 	function fixPath(path) {
@@ -110,8 +113,11 @@ module.exports = function (grunt) {
 			// 默认使用`pngsmith`图像处理引擎
 			engine: 'pngsmith',
 
-			// 扩展参数，不建议修改，image-set 模板
+			// 扩展参数，不建议修改，image-set 模板，占位文件
 			IMAGE_SET_CSS_TMPL: IMAGE_SET_CSS_TMPL,
+			IMAGE_SET_PLACE_FILE_BEFORE: IMAGE_SET_PLACE_FILE_BEFORE,
+			IMAGE_SET_PLACE_FILE_END: IMAGE_SET_PLACE_FILE_END,
+			IMAGE_SET_PLACE_FILE: IMAGE_SET_PLACE_FILE,
 			// 扩展参数，不建议修改， media query 模板
 			MEDIA_QUERY_CSS_TMPL: MEDIA_QUERY_CSS_TMPL
 		});
@@ -229,9 +235,8 @@ module.exports = function (grunt) {
 							retinaImgList.push(retinaImgFullPath);
 						}
 
-						// add image-set css
-						var imageSetCSS = useimageset ? 
-						//var imageSetCSS = useimageset && retinaImgHash[retinaImgFullPath] ? 
+						// add image-set css, only when file exists
+						var imageSetCSS = useimageset && retinaImgHash[retinaImgFullPath] ? 
 							options.IMAGE_SET_CSS_TMPL.replace(/\{spriteImg\}/g, sliceData.spriteImg)
 								.replace(/\{retinaSpriteImg\}/g, sliceData.retinaSpriteImg) :
 							'';
@@ -244,7 +249,8 @@ module.exports = function (grunt) {
 						}
 
 						var retinaImageCreater = require('../lib/retinaImageCreater');
-						return retinaImageCreater.createBySliceData(sliceData, options, cb);
+
+						return retinaImageCreater.createBySliceData(sliceData, options, grunt.file, cb);
 					}
 
 					cb(null, null);
