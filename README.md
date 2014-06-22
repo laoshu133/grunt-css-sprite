@@ -22,6 +22,8 @@
         options: {
             // sprite背景图源文件夹，只有匹配此路径才会处理，默认 images/slice/
             imagepath: 'test/slice/',
+            // 映射CSS中背景路径，支持函数和数组，默认为 null
+            imagepath_map: null,
             // 雪碧图输出目录，注意，会覆盖之前文件！默认 images/
             spritedest: 'test/publish/images/',
             // 替换后的背景路径，默认 ../images/
@@ -43,13 +45,13 @@
         },
         autoSprite: {
             files: [{
-                //启用动态扩展
+                // 启用动态扩展
                 expand: true,
                 // css文件源的文件夹
                 cwd: 'test/css/',
                 // 匹配规则
                 src: '*.css',
-                //导出css和sprite的路径地址
+                // 导出css和sprite的路径地址
                 dest: 'test/publish/css/',
                 // 导出的css名
                 ext: '.sprite.css'
@@ -65,6 +67,9 @@
 
     * `imagepath` 
         必填项，sprite背景图源文件夹，只有匹配此路径才会处理，默认 images/slice/
+
+    * `imagepath_map`
+    	映射CSS中背景路径，支持函数和数组，默认为 null
         
     * `spritedest` 
         必填项，雪碧图输出目录，注意，会覆盖之前文件！默认 images/
@@ -169,6 +174,8 @@
 `0.0.8` 修正`getSliceData`获取所有CSS背景属性正则匹配
 
 `0.0.9` 重构操作流程，添加 `image-set` 支持
+
+`0.1.0` 添加 `image-prefix` 参数
 
 ### 致谢
 

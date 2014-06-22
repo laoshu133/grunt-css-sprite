@@ -12,6 +12,8 @@ module.exports = function(grunt){
 			options: {
 				// sprite背景图源文件夹，只有匹配此路径才会处理，默认 images/slice/
 				imagepath: 'test/slice/',
+				// 映射CSS中背景路径，支持函数和数组，默认为 null
+				imagepath_map: null,
 				// 雪碧图输出目录，注意，会覆盖之前文件！默认 images/
 				spritedest: 'test/publish/images/',
 				// 替换后的背景路径，默认 ../images/
@@ -33,13 +35,13 @@ module.exports = function(grunt){
 			},
 			autoSprite: {
 				files: [{
-					//启用动态扩展
+					// 启用动态扩展
 					expand: true,
 					// css文件源的文件夹
 					cwd: 'test/css/',
 					// 匹配规则
 					src: '*.css',
-					//导出css和sprite的路径地址
+					// 导出css和sprite的路径地址
 					dest: 'test/publish/css/',
 					// 导出的css名
 					ext: '.sprite.css'
@@ -49,17 +51,24 @@ module.exports = function(grunt){
 			imageSetSprite: {
 				options: {
 					useimageset: true,
+					imagepath_map: ['/w/grunt-css-sprite/test/', '../'],
+					/* 
+					imagepath_map: function(uri) {
+						return String(uri).replace('/w/grunt-css-sprite/test/', '../');
+					},
+					*/
 					spritedest: 'test/publish/images/imageset/',
-					spritepath: '../../images/imageset/',
+					spritepath: '../../images/imageset/'
+					//,spritepath: '/w/grunt-css-sprite/test/publish/images/imageset/'
 				},
 				files: [{
-					//启用动态扩展
+					// 启用动态扩展
 					expand: true,
 					// css文件源的文件夹
 					cwd: 'test/css/',
 					// 匹配规则
 					src: '*.css',
-					//导出css和sprite的路径地址
+					// 导出css和sprite的路径地址
 					dest: 'test/publish/css/imageset/',
 					// 导出的css名
 					ext: '.imageset.css'
