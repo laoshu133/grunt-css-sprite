@@ -32,6 +32,7 @@ module.exports = function (grunt) {
 		slicePath = fixPath(slicePath);
 
 		cssData = cssData.replace(rbgs, function(css, b, uri) {
+			// filter absolute path
 			if(rabsUrl.test(uri)) {
 				return css;
 			}
@@ -40,7 +41,12 @@ module.exports = function (grunt) {
 			imgFullPath = fixPath(path.join(cssPath, uri)),
 			imgPath = path.basename(imgFullPath);
 
-			if(!imgHash[imgFullPath] && !grunt.file.exists(imgFullPath)) {
+			if(
+				// low call grunt.file.exists
+				!imgHash[imgFullPath] && 
+				// match path
+				(imgFullPath.indexOf(slicePath) !== 0 || !grunt.file.exists(imgFullPath))
+			) {
 				return css;
 			}
 
