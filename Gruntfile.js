@@ -5,7 +5,7 @@
  * Licensed under the MIT license.
  */
 
-module.exports = function(grunt){
+module.exports = function(grunt) {
 	grunt.initConfig({
 		//Auto sprite
 		sprite: {

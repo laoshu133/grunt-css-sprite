@@ -177,6 +177,8 @@
 
 `0.1.2` 添加，完善 `imagepath-map` 参数
 
+`0.1.3` 修正 #11 #12
+
 ### 致谢
 
 感谢 [spritesmith](https://github.com/Ensighten/spritesmith)
