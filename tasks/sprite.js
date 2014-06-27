@@ -171,13 +171,12 @@ module.exports = function (grunt) {
 		            }
 
 					sliceData.timestamp = options.spritestamp ? ('?'+timeNow) : '';
-					sliceData.imgDest = path.join(options.spritedest, cssFilename + '.png');
-					sliceData.spriteImg = path.join(options.spritepath, cssFilename + '.png') + 
+					sliceData.imgDest = fixPath(path.join(options.spritedest, cssFilename + '.png'));
+					sliceData.spriteImg = fixPath(path.join(options.spritepath, cssFilename + '.png')) + 
 						sliceData.timestamp;
 
-					sliceData.retinaImgDest = sliceData.imgDest.replace(/\.png$/, '@2x.png');
-					sliceData.retinaSpriteImg = path.join(options.spritepath, cssFilename + '@2x.png') + 
-						sliceData.timestamp;
+					sliceData.retinaImgDest = fixPath(sliceData.imgDest.replace(/\.png$/, '@2x.png'));
+					sliceData.retinaSpriteImg = fixPath(path.join(options.spritepath, cssFilename + '@2x.png')) +  sliceData.timestamp;
 
 					cb(null);
 				},
@@ -187,13 +186,6 @@ module.exports = function (grunt) {
 				},
 				// write sprite image file
 				function writeSrpiteFile(spriteImgData, cb) {
-		            // cssFilename, timestamp
-		            var cssFilename = path.basename(src, '.css');
-
-		            if(options.newsprite) {
-		                cssFilename += '-' + timeNow;
-		            }
-
 		            // write file
 	                grunt.file.write(sliceData.imgDest, spriteImgData.image, { encoding: 'binary' });
 	                grunt.log.writelns(('Done! [Created] -> ' + sliceData.imgDest));
@@ -213,7 +205,7 @@ module.exports = function (grunt) {
 						css = css.replace(cssItem.imgPath, sliceData.spriteImg);
 
 						// Add a semicolon if needed
-	                    if(!rsemicolon.test(css)){
+	                    if(!rsemicolon.test(css)) {
 	                        css += ';';
 	                    }
 	                    css += IMAGE_SET_PLACE;
