@@ -131,6 +131,8 @@ module.exports = function (grunt) {
 			algorithm: 'binary-tree',
 			// 默认使用`pngsmith`图像处理引擎
 			engine: 'pngsmith',
+			// 是否压缩单位
+			cssmin: true,
 
 			// 扩展参数，不建议修改，image-set 模板，占位文件
 			IMAGE_SET_CSS_TMPL: IMAGE_SET_CSS_TMPL,
@@ -205,11 +207,24 @@ module.exports = function (grunt) {
 						css = css.replace(cssItem.imgPath, sliceData.spriteImg);
 
 						// Add a semicolon if needed
-	                    if(!rsemicolon.test(css)) {
-	                        css += ';';
-	                    }
-	                    css += IMAGE_SET_PLACE;
-						css += 'background-position:-'+ coord.x +'px -'+ coord.y +'px;';
+			                    	if(!rsemicolon.test(css)) {
+			                        	css += ';';
+			                    	}
+			                    	css += IMAGE_SET_PLACE;
+			                    
+			                    	if (options.cssmin) {
+	            					var x, y, bgX, bgY;
+	
+							x = !coord.x ? 0 : -coord.x;
+							y = !coord.y ? 0 : -coord.y;
+
+							bgX = x == 0 ? 0 : (x + 'px');
+							bgY = y == 0 ? 0 : (y + 'px');
+
+							css += 'background-position:'+ bgX + ' ' + bgY;
+			                    	} else {
+			                    		css += 'background-position:-'+ coord.x +'px -'+ coord.y +'px;';
+			                    	}
 
 						cssItem.newCss = css;
 						cssItem.height = coord.height;
