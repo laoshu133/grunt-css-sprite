@@ -45,7 +45,7 @@ module.exports = function (grunt) {
 				imgUri = slicePathMap(imgUri);
 			}
 
-			// filter absolute path
+			// absolute path
 			if(rabsUrl.test(imgUri)) {
 				return css;
 			}
@@ -194,13 +194,13 @@ module.exports = function (grunt) {
 	                cb(null, spriteImgData.coordinates);
 				},
 				// set slice position
-				function setSlicePosition(coords, cb) {
+				function setSlicePosition(coordinates, cb) {
 					var rsemicolon = /;\s*$/;
 
 					sliceData.cssList.forEach(function(cssItem) {
 						var 
 						css = cssItem.css,
-						coord = coords[cssItem.imgFullPath];
+						coords = coordinates[cssItem.imgFullPath];
 
 						css = css.replace(cssItem.imgPath, sliceData.spriteImg);
 
@@ -209,13 +209,13 @@ module.exports = function (grunt) {
 	                        css += ';';
 	                    }
 	                    css += IMAGE_SET_PLACE;
-						css += 'background-position:-'+ coord.x +'px -'+ coord.y +'px;';
+	                    css += 'background-position:-'+ coords.x +'px -'+ coords.y +'px;';
 
 						cssItem.newCss = css;
-						cssItem.height = coord.height;
-						cssItem.width = coord.width;
-						cssItem.x = coord.x;
-						cssItem.y = coord.y;
+						cssItem.height = coords.height;
+						cssItem.width = coords.width;
+						cssItem.x = coords.x;
+						cssItem.y = coords.y;
 					});
 
 					cb(null);
@@ -285,7 +285,7 @@ module.exports = function (grunt) {
 					cssList = sliceData.cssList,
 					useimageset = options.useimageset,
 					retinaSpriteImgData = sliceData.retinaSpriteImgData,
-					coords = retinaSpriteImgData ? retinaSpriteImgData.coordinates : {};
+					coordinates = retinaSpriteImgData ? retinaSpriteImgData.coordinates : {};
 
 				    var 
 				    cssData = sliceData.cssData,
@@ -301,7 +301,7 @@ module.exports = function (grunt) {
 					cssProps = [],
 					lastInx = -1;
 
-					sliceData.cssData = cssData.replace(R_SLICE_PLACE, function(place, id) {
+					sliceData.cssData = cssData.replace(R_SLICE_PLACE, function(a, id) {
 						var 
 						cssItem = cssList[parseInt(id, 10)],
 						ret = cssItem ? cssItem.newCss : '';
@@ -310,18 +310,17 @@ module.exports = function (grunt) {
 							return ret;
 						}
 
-						var coordData = coords[cssItem.retinaImgFullPath];
-						if(!coordData || !cssItem.retinaImgFullPath) {
+						var coords = coordinates[cssItem.retinaImgFullPath];
+						if(!coords) {
 							return ret;
 						}
-
-						place = SLICE_PLACE.replace('{id}', id);
 
 						// media query retina css
 						var 
 						selector,
+						place = SLICE_PLACE.replace('{id}', id),
 						rselector = new RegExp('([^}\\n\\/]+)\\{[^\\}]*?' + place.replace(rreEscape, '\\$&'));
-						tmpCss =  tmpCss.replace(rselector, function(a, b) {
+						tmpCss = tmpCss.replace(rselector, function(a, b) {
 							selector = b;
 							return b + '{';
 						});
@@ -333,7 +332,7 @@ module.exports = function (grunt) {
 						var selectorInx = ++lastInx;
 		                cssSelectors[selectorInx] = selector;
 		                cssProps[selectorInx] = selector + ' { background-position:-';
-		                cssProps[selectorInx] += (coordData.x/2) + 'px -' + (coordData.y/2) + 'px;}';
+		                cssProps[selectorInx] += (coords.x/2) + 'px -' + (coords.y/2) + 'px;}';
 
 		                // unique selector, and keep selector order
 		                selectorInx = cssSelectorHash[selector];
