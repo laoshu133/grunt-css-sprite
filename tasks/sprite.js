@@ -209,7 +209,16 @@ module.exports = function (grunt) {
                             css += ';';
                         }
                         css += IMAGE_SET_PLACE;
-                        css += 'background-position:-'+ coords.x +'px -'+ coords.y +'px;';
+
+                        var bgPos = ['-'+ coords.x +'px', '-'+ coords.y +'px'];
+                        if(coords.x === 0) {
+                            bgPos[0] = 0;
+                        }
+                        if(coords.y === 0) {
+                            bgPos[1] = 0;
+                        }
+
+                        css += 'background-position: '+ bgPos.join(' ') +';';
 
                         cssItem.newCss = css;
                         cssItem.height = coords.height;
@@ -331,8 +340,16 @@ module.exports = function (grunt) {
 
                         var selectorInx = ++lastInx;
                         cssSelectors[selectorInx] = selector;
-                        cssProps[selectorInx] = selector + ' { background-position:-';
-                        cssProps[selectorInx] += (coords.x/2) + 'px -' + (coords.y/2) + 'px;}';
+
+                        var bgPos = ['-'+ (coords.x/2) +'px', '-'+ (coords.y/2) +'px'];
+                        if(coords.x === 0) {
+                            bgPos[0] = 0;
+                        }
+                        if(coords.y === 0) {
+                            bgPos[1] = 0;
+                        }
+
+                        cssProps[selectorInx] = selector + ' { background-position: '+ bgPos.join(' ') + ';}';
 
                         // unique selector, and keep selector order
                         selectorInx = cssSelectorHash[selector];
