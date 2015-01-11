@@ -1,4 +1,4 @@
-var 
+var
 spritesmith = require('spritesmith'),
 async = require('async'),
 path = require('path');
@@ -20,7 +20,7 @@ module.exports = function (grunt) {
     }
 
     function getSliceData(src, options) {
-        var 
+        var
         cssPath = path.dirname(src),
         cssData = grunt.file.read(src),
         rabsUrl = /^(\/|https?:|file:)/i,
@@ -54,7 +54,7 @@ module.exports = function (grunt) {
 
             if(
                 // low call grunt.file.exists
-                !imgHash[imgFullPath] && 
+                !imgHash[imgFullPath] &&
                 // match path
                 (imgFullPath.indexOf(slicePath) !== 0 || !grunt.file.exists(imgFullPath))
             ) {
@@ -129,8 +129,8 @@ module.exports = function (grunt) {
             cssstamp: false,
             // 默认使用二叉树最优排列算法
             algorithm: 'binary-tree',
-            // 默认使用`pngsmith`图像处理引擎
-            engine: 'pngsmith',
+            // 默认使用`pixelsmith`图像处理引擎
+            engine: 'pixelsmith',
 
             // 扩展参数，不建议修改，image-set 模板，占位文件
             IMAGE_SET_CSS_TMPL: IMAGE_SET_CSS_TMPL,
@@ -147,7 +147,7 @@ module.exports = function (grunt) {
         }
 
         async.each(this.files, function(file, callback) {
-            var 
+            var
             src = file.src[0],
             cssDest = file.dest,
             sliceData = getSliceData(src, options),
@@ -162,7 +162,7 @@ module.exports = function (grunt) {
             async.waterfall([
                 // base config
                 function baseConfig(cb) {
-                    var 
+                    var
                     cssFilename = path.basename(src, '.css'),
                     timeNow = grunt.template.today('yyyymmddHHmmss');
 
@@ -172,7 +172,7 @@ module.exports = function (grunt) {
 
                     sliceData.timestamp = options.spritestamp ? ('?'+timeNow) : '';
                     sliceData.imgDest = fixPath(path.join(options.spritedest, cssFilename + '.png'));
-                    sliceData.spriteImg = fixPath(path.join(options.spritepath, cssFilename + '.png')) + 
+                    sliceData.spriteImg = fixPath(path.join(options.spritepath, cssFilename + '.png')) +
                         sliceData.timestamp;
 
                     sliceData.retinaImgDest = fixPath(sliceData.imgDest.replace(/\.png$/, '@2x.png'));
@@ -198,7 +198,7 @@ module.exports = function (grunt) {
                     var rsemicolon = /;\s*$/;
 
                     sliceData.cssList.forEach(function(cssItem) {
-                        var 
+                        var
                         css = cssItem.css,
                         coords = coordinates[cssItem.imgFullPath];
 
@@ -231,13 +231,13 @@ module.exports = function (grunt) {
                 },
                 // get retina image & add image-set css
                 function getRetinaImg(cb) {
-                    var 
+                    var
                     useimageset = options.useimageset,
                     retinaImgList = sliceData.retinaImgList = [],
                     retinaImgHash = sliceData.retinaImgHash = {};
 
                     sliceData.cssList.forEach(function(cssItem, id) {
-                        var 
+                        var
                         extName = path.extname(cssItem.imgFullPath),
                         filename = path.basename(cssItem.imgFullPath, extName),
                         retinaImgFullPath = path.join(path.dirname(cssItem.imgFullPath), filename + '@2x' + extName);
@@ -256,7 +256,7 @@ module.exports = function (grunt) {
                         }
 
                         // add image-set css, only when file exists
-                        var imageSetCSS = useimageset && retinaImgHash[retinaImgFullPath] ? 
+                        var imageSetCSS = useimageset && retinaImgHash[retinaImgFullPath] ?
                             options.IMAGE_SET_CSS_TMPL.replace(/\{spriteImg\}/g, sliceData.spriteImg)
                                 .replace(/\{retinaSpriteImg\}/g, sliceData.retinaSpriteImg) :
                             '';
@@ -290,20 +290,20 @@ module.exports = function (grunt) {
                 },
                 // replace css
                 function replaceCss(cb) {
-                    var 
+                    var
                     cssList = sliceData.cssList,
                     useimageset = options.useimageset,
                     retinaSpriteImgData = sliceData.retinaSpriteImgData,
                     coordinates = retinaSpriteImgData ? retinaSpriteImgData.coordinates : {};
 
-                    var 
+                    var
                     cssData = sliceData.cssData,
                     // a[href*='}{']::after{ content:'}{';} 规避此类奇葩CSS
                     tmpCss = cssData.replace(/[:=]\s*([\'\"]).*?\1/g, function(a){
                         return a.replace(/\}/g, '');
                     });
 
-                    var 
+                    var
                     rreEscape = /[-\/\\^$*+?.()|[\]{}]/g,
                     cssSelectorHash = {},
                     cssSelectors = [],
@@ -311,7 +311,7 @@ module.exports = function (grunt) {
                     lastInx = -1;
 
                     sliceData.cssData = cssData.replace(R_SLICE_PLACE, function(a, id) {
-                        var 
+                        var
                         cssItem = cssList[parseInt(id, 10)],
                         ret = cssItem ? cssItem.newCss : '';
 
@@ -325,7 +325,7 @@ module.exports = function (grunt) {
                         }
 
                         // media query retina css
-                        var 
+                        var
                         selector,
                         place = SLICE_PLACE.replace('{id}', id),
                         rselector = new RegExp('([^}\\n\\/]+)\\{[^\\}]*?' + place.replace(rreEscape, '\\$&'));
@@ -366,7 +366,7 @@ module.exports = function (grunt) {
                     });
 
                     if(retinaSpriteImgData && !useimageset) {
-                        var 
+                        var
                         retinaSpriteImg = sliceData.retinaSpriteImg,
                         bgWidth = Math.floor(retinaSpriteImgData.properties.width / 2);
 
