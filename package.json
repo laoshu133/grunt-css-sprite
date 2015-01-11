@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "async": "^0.9.0",
-    "spritesmith": "~0.19.2"
+    "spritesmith": "~1.0.0"
   },
   "devDependencies": {
     "grunt": "~0.4.5",
