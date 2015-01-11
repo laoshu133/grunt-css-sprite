@@ -14,7 +14,7 @@
 5. 在样式末尾追加时间戳
 6. 按照时间戳命名文件
 
-  
+
 ### 配置说明
 
     // 自动雪碧图
@@ -40,8 +40,8 @@
             cssstamp: true,
             // 默认使用二叉树最优排列算法
             algorithm: 'binary-tree',
-            // 默认使用`pngsmith`图像处理引擎
-            engine: 'pngsmith'
+            // 默认使用`pixelsmith`图像处理引擎
+            engine: 'pixelsmith'
         },
         autoSprite: {
             files: [{
@@ -62,68 +62,68 @@
 * **files**
 
     使用标准的动态文件对象
-    
+
 * **options**
 
-    * `imagepath` 
+    * `imagepath`
         必填项，sprite背景图源文件夹，只有匹配此路径才会处理，默认 images/slice/
 
     * `imagepath_map`
     	映射CSS中背景路径，支持函数和数组，默认为 null
-        
-    * `spritedest` 
+
+    * `spritedest`
         必填项，雪碧图输出目录，注意，会覆盖之前文件！默认 images/
-        
-    * `spritepath` 
+
+    * `spritepath`
         必填项，替换后的背景路径，默认 ../images/
 
-    * `padding` 
+    * `padding`
         可选项，指定各图片间间距，默认 0
-	
-	* `useimageset` 
+
+	* `useimageset`
         可选项，是否使用 image-set 作为2x图片实现，默认不使用
 
-    * `newsprite` 
+    * `newsprite`
         可选项，是否以时间戳为文件名生成新的雪碧图文件，如果启用请注意清理之前生成的文件，默认不生成新文件
 
-    * `spritestamp` 
+    * `spritestamp`
         可选项，是否给雪碧图追加时间戳，默认不追加
 
-    * `cssstamp` 
+    * `cssstamp`
         可选项，是否在CSS文件末尾追加时间戳，默认不追加
-        
-    * `engine` 
+
+    * `engine`
         可选项，指定图像处理引擎，默认选择`pngsmith`
 
-    * `algorithm` 
+    * `algorithm`
         可选项，指定排列方式，有`top-down` （从上至下）, `left-right`（从左至右）, `diagonal`（从左上至右下）, `alt-diagonal` （从左下至右上）和 `binary-tree`（二叉树排列） 五种供选择，默认 `binary-tree`；参考 [Layout](https://github.com/twolfson/layout/)
 
 ### 载入插件
 
 请不要忘了载入插件
 
-    grunt.loadNpmTasks('grunt-css-sprite');    
-    
+    grunt.loadNpmTasks('grunt-css-sprite');
+
 ### 打个比方
 
 有一个类似这样的目录结构：
-        
-    ├── test/                
-        ├── css/    
-            └── icon.css        
-        ├── images/    
-            ├── slice/    
+
+    ├── test/
+        ├── css/
+            └── icon.css
+        ├── images/
+            ├── slice/
                 ├── icon-a.png
-                ├── icon-a@2x.png        
+                ├── icon-a@2x.png
                 ├── icon-b.png
                 └── icon-b@2x.png
         └── publish/
             ├── css/
                 └── icon.sprite.css
-            └── images/    
+            └── images/
                 ├── icon.png
                 └── icon@2x.png
-        
+
 `css/icon.css` 调用`images/slice/`目录下的切片，`grunt-css-sprite` 会将 `css/icon.css` 进行处理。
 
 `publish/css/` 目录下是处理完成的样式 `icon.sprite.css` ，而 `publish/images/` 目录下是合并完成的雪碧图。
@@ -142,18 +142,18 @@
 
 经 [Mark](https://github.com/jsmarkus) 提醒，之前对于`gm` 的依赖纯属多余；如果你需要将图片处理引擎切换为`gm`或者其他引擎，请手动安装对应的依赖包。
 举例 [Graphics Magick(gm)](http://www.graphicsmagick.org/) 依赖的安装流程：
-    
+
 * **Graphics Magick(gm)**
 
     * Mac
-        // 安装GM图形库    
+        // 安装GM图形库
         ```
-        brew install GraphicsMagick    
+        brew install GraphicsMagick
         npm install gmsmith
         ```
 
     * Windows
-        前往官方网站[下载安装GM图形库](http://www.graphicsmagick.org/download.html)    
+        前往官方网站[下载安装GM图形库](http://www.graphicsmagick.org/download.html)
         然后命令行执行：
         ```
         npm install gmsmith
@@ -179,12 +179,17 @@
 
 `0.1.3` 修正 #11 #12
 
+`0.1.5` 更新依赖 `spritesmith` 版本
+
+
 ### 致谢
 
 感谢 [spritesmith](https://github.com/Ensighten/spritesmith)
 
 感谢 [Meters](https://github.com/hellometers)
 
-感谢 [Mark](https://github.com/jsmarkus) 修正 [#1](https://github.com/laoshu133/grunt-css-sprite/pull/1)，提出 [#2](https://github.com/laoshu133/grunt-css-sprite/pull/2) 
+感谢 [Mark](https://github.com/jsmarkus) 修正 [#1](https://github.com/laoshu133/grunt-css-sprite/pull/1)，提出 [#2](https://github.com/laoshu133/grunt-css-sprite/pull/2)
 
-> 使用中有任何问题，请提交 [Issue](https://github.com/laoshu133/grunt-css-sprite/issues) 或 [与我联系](http://www.laoshu133.com)
+感谢 [unmric](https://github.com/unmric)
+
+> 使用中有任何问题，请提交 [Issue](https://github.com/laoshu133/grunt-css-sprite/issues)
