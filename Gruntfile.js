@@ -30,8 +30,8 @@ module.exports = function(grunt) {
 				cssstamp: true,
 				// 默认使用二叉树最优排列算法
 				algorithm: 'binary-tree',
-				// 默认使用`pngsmith`图像处理引擎
-				engine: 'pngsmith'
+				// 默认使用`pixelsmith`图像处理引擎
+				engine: 'pixelsmith'
 			},
 			autoSprite: {
 				files: [{
@@ -52,7 +52,7 @@ module.exports = function(grunt) {
 				options: {
 					useimageset: true,
 					imagepath_map: ['/w/grunt-css-sprite/test/', '../'],
-					/* 
+					/*
 					imagepath_map: function(uri) {
 						return String(uri).replace('/w/grunt-css-sprite/test/', '../');
 					},
