@@ -319,7 +319,8 @@ module.exports = function (grunt) {
                         var selector;
                         var place = SLICE_PLACE.replace('{id}', id);
                         var rselector = new RegExp('([^}\\n\\/]+)\\{[^\\}]*?' + place.replace(rreEscape, '\\$&'));
-                        var tmpCss = tmpCss.replace(rselector, function(a, b) {
+
+                        tmpCss = tmpCss.replace(rselector, function(a, b) {
                             selector = b;
                             return b + '{';
                         });
