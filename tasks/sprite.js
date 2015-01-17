@@ -259,12 +259,15 @@ module.exports = function (grunt) {
 
                     if(retinaImgList.length > 0) {
                         if(!useimageset) {
-                            return createSprite(retinaImgList, options, cb);
+                            createSprite(retinaImgList, options, cb);
+
+                            return;
                         }
 
                         var retinaImageCreater = require('../lib/retinaImageCreater');
+                        retinaImageCreater.createBySliceData(sliceData, options, grunt.file, cb);
 
-                        return retinaImageCreater.createBySliceData(sliceData, options, grunt.file, cb);
+                        return;
                     }
 
                     cb(null, null);
