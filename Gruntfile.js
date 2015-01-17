@@ -85,6 +85,6 @@ module.exports = function(grunt) {
 	grunt.loadTasks('tasks');
 
 	// 声明别名
-	grunt.registerTask('default', ['sprite']);
+	grunt.registerTask('default', ['jshint', 'sprite']);
 	grunt.registerTask('test', ['sprite']);
 };
