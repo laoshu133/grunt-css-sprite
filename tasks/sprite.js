@@ -1,6 +1,7 @@
-var spritesmith = require('spritesmith');
-var async = require('async');
 var path = require('path');
+var async = require('async');
+var spritesmith = require('spritesmith');
+var imageSetCreator = require('../lib/imageSetCreator');
 
 module.exports = function (grunt) {
     "use strict";
@@ -18,24 +19,60 @@ module.exports = function (grunt) {
         return String(path).replace(/\\/g, '/').replace(/\/$/, '');
     }
 
+    function fill(tmpl, data) {
+        for(var k in data) {
+            tmpl = tmpl.replace(new RegExp('\\{'+ k +'\\}', 'g'), data[k]);
+        }
+
+        return tmpl;
+    }
+
+    function escapeRegExp(str) {
+        var rreEscape = /[-\/\\^$*+?.()|[\]{}]/g;
+
+        return str.replace(rreEscape, '\\$&');
+    }
+
+    function createPlace() {
+        if(!createPlace.id) {
+            createPlace.id = 0;
+        }
+
+        var id = createPlace.id++;
+        id = '{{$sprite_place_'+ id +'$}}';
+
+        var pattern = new RegExp(escapeRegExp(id), 'g');
+        return {
+            id: id,
+            pattern: pattern
+        };
+    }
+
     function getSliceData(src, options) {
         var cssPath = path.dirname(src);
         var cssData = grunt.file.read(src);
-        var rabsUrl = /^(\/|https?:|file:)/i;
+        var rabsUrl = /^(?:\/|https?:|file:)/i;
         var rbgs = /background(?:-image)?\s*:[^;]*?url\((["\']?)([^\)]+)\1\)[^};]*;?/ig;
-        var slicePath = fixPath(options.imagepath);
+        var slicePath = path.normalize(fixPath(options.imagepath));
         var slicePathMap = options.imagepath_map;
-        var _slicePathMap = slicePathMap;
 
-        // map imagepath
-        if(Array.isArray(slicePathMap)) {
-            slicePathMap = function(uri) {
-                return String(uri).replace(_slicePathMap[0], _slicePathMap[1]);
+        // ignore comments
+        var commentsData = {};
+        var commentRe = /\/\*[\s\S]*?\*\//g;
+        cssData = cssData.replace(commentRe, function(a) {
+            var place = createPlace();
+
+            commentsData[place.id] = {
+                place: place,
+                data: a
             };
-        }
 
-        var cssList = [], cssHash = {}, cssInx = 0;
-        var imgList = [], imgHash = {}, imgInx = 0;
+            return place.id;
+        });
+
+        // parse css data
+        var cssList = [], cssHash = {}, cssInx = -1;
+        var imgList = [], imgHash = {}, imgInx = -1;
 
         cssData = cssData.replace(rbgs, function(css, b, uri) {
             var imgUri = uri;
@@ -49,6 +86,7 @@ module.exports = function (grunt) {
             }
 
             var imgFullPath = fixPath(path.join(cssPath, imgUri));
+            imgFullPath = path.normalize(imgFullPath);
 
             if(
                 // low call grunt.file.exists
@@ -59,26 +97,26 @@ module.exports = function (grunt) {
                 return css;
             }
 
-            var currCssInx = cssHash[css];
-            if(currCssInx === void 0) {
-                currCssInx = cssHash[css] = cssInx;
+            var place = createPlace();
+            place.cssInx = ++cssInx;
 
-                cssList[cssInx++] = {
-                    imgFullPath: imgFullPath,
-                    imgPath: uri,
-                    css: css
-                };
-            }
+            cssList[place.cssInx] = {
+                place: place,
+                imgFullPath: imgFullPath,
+                imgPath: uri,
+                css: css
+            };
 
             if(!imgHash[imgFullPath]) {
-                imgList[imgInx++] = imgFullPath;
+                imgList[++imgInx] = imgFullPath;
                 imgHash[imgFullPath] = true;
             }
 
-            return SLICE_PLACE.replace('{id}', currCssInx);
+            return place.id;
         });
 
         return {
+            commentsData: commentsData,
             cssData: cssData,
             cssList: cssList,
             cssHash: cssHash,
@@ -93,15 +131,8 @@ module.exports = function (grunt) {
             padding: options.padding,
             engine: options.engine,
             src: list
-        }, function(err, ret) {
-            if(err) {
-                return callback(err);
-            }
-
-            callback(null, ret);
-        });
+        }, callback);
     }
-
 
     grunt.registerMultiTask('sprite', 'Create sprite image with slices and update the CSS file.', function() {
         var done = this.async();
@@ -144,15 +175,23 @@ module.exports = function (grunt) {
             options.padding += 1;
         }
 
+        // imagepath map
+        var _imagepath_map = options.imagepath_map;
+        if(Array.isArray(options.imagepath_map)) {
+            options.imagepath_map = function(uri) {
+                return String(uri).replace(_imagepath_map[0], _imagepath_map[1]);
+            };
+        }
+
         async.each(this.files, function(file, callback) {
             var src = file.src[0];
-            var cssDest = file.dest;
             var sliceData = getSliceData(src, options);
             var cssList = sliceData.cssList;
+            var cssDest = file.dest;
 
             if(!cssList || cssList.length <= 0) {
                 grunt.file.copy(src, cssDest);
-                grunt.log.writelns(('Done! [Copied] -> ' + cssDest));
+                grunt.log.writelns('Done! [Copied] -> ' + cssDest);
 
                 return callback(null);
             }
@@ -185,7 +224,210 @@ module.exports = function (grunt) {
                 function writeSrpiteFile(spriteImgData, cb) {
                     // write file
                     grunt.file.write(sliceData.imgDest, spriteImgData.image, { encoding: 'binary' });
-                    grunt.log.writelns(('Done! [Created] -> ' + sliceData.imgDest));
+                    grunt.log.writelns('Done! [Created] -> ' + sliceData.imgDest);
+
+                    sliceData.spriteImgData = spriteImgData;
+                    cb(null, spriteImgData.coordinates);
+                },
+                // set slice position
+                function setSlicePosition(coordinates, cb) {
+                    var rspaces = /\s+/;
+                    var rsemicolon = /;\s*$/;
+                    var rbgUrl = /url\([^\)]+\)/i;
+                    var rbgEmpty = /background(?:-image)?\s*:\s*;?/;
+
+                    sliceData.cssList.forEach(function(cssItem) {
+                        var coords = coordinates[cssItem.imgFullPath];
+
+                        var css = cssItem.css;
+                        css = css.replace(rbgUrl, '');
+
+                        if(rbgEmpty.test(css)) {
+                            css = '';
+                        }
+                        else {
+                            css = css.replace(rspaces, ' ');
+
+                            // Add a semicolon if needed
+                            if(!rsemicolon.test(css)) {
+                                css += ';';
+                            }
+                        }
+
+                        var bgPos = ['-'+ coords.x +'px', '-'+ coords.y +'px'];
+                        if(coords.x === 0) {
+                            bgPos[0] = 0;
+                        }
+                        if(coords.y === 0) {
+                            bgPos[1] = 0;
+                        }
+
+                        css += 'background-position: '+ bgPos.join(' ') +';';
+
+                        cssItem.newCss = css;
+                        cssItem.height = coords.height;
+                        cssItem.width = coords.width;
+                        cssItem.x = coords.x;
+                        cssItem.y = coords.y;
+                    });
+
+                    cb(null);
+                },
+                // get retina image & add image-set, css
+                function getRetinaImg(cb) {
+                    var useimageset = options.useimageset;
+                    var retinaImgList = sliceData.retinaImgList = [];
+                    var retinaImgHash = sliceData.retinaImgHash = {};
+
+                    sliceData.cssList.forEach(function(cssItem, id) {
+                        var extName = path.extname(cssItem.imgFullPath);
+                        var filename = path.basename(cssItem.imgFullPath, extName);
+                        var retinaImgFullPath = path.join(path.dirname(cssItem.imgFullPath), filename + '@2x' + extName);
+
+                        if(!retinaImgHash[retinaImgFullPath] && grunt.file.exists(retinaImgFullPath)) {
+                            cssItem.retinaImgFullPath = retinaImgFullPath;
+                            retinaImgHash[retinaImgFullPath] = {
+                                id: id,
+                                height: 2 * cssItem.height,
+                                width: 2 * cssItem.width,
+                                x: 2 * cssItem.x,
+                                y: 2 * cssItem.y
+                            };
+
+                            retinaImgList.push(retinaImgFullPath);
+                        }
+
+                        // add image-set css, only when file exists
+                        // var imageSetCSS = useimageset && retinaImgHash[retinaImgFullPath] ?
+                        //     options.IMAGE_SET_CSS_TMPL.replace(/\{spriteImg\}/g, sliceData.spriteImg)
+                        //         .replace(/\{retinaSpriteImg\}/g, sliceData.retinaSpriteImg) :
+                        //     '';
+                        // cssItem.newCss = cssItem.newCss.replace(IMAGE_SET_PLACE, imageSetCSS);
+                    });
+
+                    if(!retinaImgList.length) {
+                        cb(null, null);
+
+                        return;
+                    }
+
+                    if(useimageset) {
+                        imageSetCreator.createBySliceData(sliceData, options, cb);
+
+                        return;
+                    }
+
+                    createSprite(retinaImgList, options, cb);
+                },
+                // write retina sprite image file
+                function writeRetinaeImgFile(retinaSpriteImgData, cb) {
+                    if(!retinaSpriteImgData) {
+                        cb(null);
+                        return;
+                    }
+
+                    sliceData.retinaSpriteImgData = retinaSpriteImgData;
+
+                    var retinaImgDest = sliceData.retinaImgDest;
+
+                    grunt.file.write(retinaImgDest, retinaSpriteImgData.image, { encoding: 'binary' });
+                    grunt.log.writelns('Done! [Created] -> ' + retinaImgDest);
+
+                    cb(null);
+                },
+                // get selectors
+                function getSelectors(cb) {
+                    var cssList = sliceData.cssList;
+
+                    // cssList.forEach(function() {
+
+                    // });
+
+                    cb(null);
+                }
+            ], callback);
+        }, done);
+    });
+
+
+    grunt.registerMultiTask('sprite2', 'Create sprite image with slices and update the CSS file.', function() {
+        var done = this.async();
+
+        var options = this.options({
+            // sprite背景图源文件夹，只有匹配此路径才会处理，默认 images/slice/
+            imagepath: 'images/slice/',
+            // 映射CSS中背景路径，支持函数和数组，默认为 null
+            imagepath_map: null,
+            // 雪碧图输出目录，注意，会覆盖之前文件！默认 images/
+            spritedest: 'images/',
+            // 替换后的背景路径，默认 ../images/
+            spritepath: '../images/',
+            // 各图片间间距，如果设置为奇数，会强制+1以保证生成的2x图片为偶数宽高，默认 0
+            padding: 0,
+            // 是否使用 image-set 作为2x图片实现，默认不使用
+            useimageset: false,
+            // 是否以时间戳为文件名生成新的雪碧图文件，如果启用请注意清理之前生成的文件，默认不生成新文件
+            newsprite: false,
+            // 给雪碧图追加时间戳，默认不追加
+            spritestamp: false,
+            // 在CSS文件末尾追加时间戳，默认不追加
+            cssstamp: false,
+            // 默认使用二叉树最优排列算法
+            algorithm: 'binary-tree',
+            // 默认使用`pixelsmith`图像处理引擎
+            engine: 'pixelsmith',
+
+            // 扩展参数，不建议修改，image-set 模板，占位文件
+            IMAGE_SET_CSS_TMPL: IMAGE_SET_CSS_TMPL,
+            IMAGE_SET_PLACE_FILE_BEFORE: IMAGE_SET_PLACE_FILE_BEFORE,
+            IMAGE_SET_PLACE_FILE_END: IMAGE_SET_PLACE_FILE_END,
+            IMAGE_SET_PLACE_FILE: IMAGE_SET_PLACE_FILE,
+            // 扩展参数，不建议修改， media query 模板
+            MEDIA_QUERY_CSS_TMPL: MEDIA_QUERY_CSS_TMPL
+        });
+
+        async.each(this.files, function(file, callback) {
+            var src = file.src[0];
+            var cssDest = file.dest;
+            var sliceData = getSliceData(src, options);
+            var cssList = sliceData.cssList;
+
+            if(!cssList || cssList.length <= 0) {
+                grunt.file.copy(src, cssDest);
+                grunt.log.writelns('Done! [Copied] -> ' + cssDest);
+
+                return callback(null);
+            }
+
+            async.waterfall([
+                // base config
+                function baseConfig(cb) {
+                    var cssFilename = path.basename(src, '.css');
+                    var timeNow = grunt.template.today('yyyymmddHHMMss');
+
+                    if(options.newsprite) {
+                        cssFilename += '-' + timeNow;
+                    }
+
+                    sliceData.timestamp = options.spritestamp ? ('?'+timeNow) : '';
+                    sliceData.imgDest = fixPath(path.join(options.spritedest, cssFilename + '.png'));
+                    sliceData.spriteImg = fixPath(path.join(options.spritepath, cssFilename + '.png')) +
+                        sliceData.timestamp;
+
+                    sliceData.retinaImgDest = fixPath(sliceData.imgDest.replace(/\.png$/, '@2x.png'));
+                    sliceData.retinaSpriteImg = fixPath(path.join(options.spritepath, cssFilename + '@2x.png')) +  sliceData.timestamp;
+
+                    cb(null);
+                },
+                // create sprite image
+                function createSpriteImg(cb) {
+                    createSprite(sliceData.imgList, options, cb);
+                },
+                // write sprite image file
+                function writeSrpiteFile(spriteImgData, cb) {
+                    // write file
+                    grunt.file.write(sliceData.imgDest, spriteImgData.image, { encoding: 'binary' });
+                    grunt.log.writelns('Done! [Created] -> ' + sliceData.imgDest);
 
                     sliceData.spriteImgData = spriteImgData;
                     cb(null, spriteImgData.coordinates);
@@ -204,7 +446,6 @@ module.exports = function (grunt) {
                         if(!rsemicolon.test(css)) {
                             css += ';';
                         }
-                        css += IMAGE_SET_PLACE;
 
                         var bgPos = ['-'+ coords.x +'px', '-'+ coords.y +'px'];
                         if(coords.x === 0) {
@@ -280,7 +521,7 @@ module.exports = function (grunt) {
                         var retinaImgDest = sliceData.retinaImgDest;
 
                         grunt.file.write(retinaImgDest, retinaSpriteImgData.image, { encoding: 'binary' });
-                        grunt.log.writelns(('Done! [Created] -> ' + retinaImgDest));
+                        grunt.log.writelns('Done! [Created] -> ' + retinaImgDest);
                     }
 
                     cb(null);
@@ -384,7 +625,7 @@ module.exports = function (grunt) {
                     }
 
                     grunt.file.write(cssDest, sliceData.cssData);
-                    grunt.log.writelns(('Done! [Created] -> ' + cssDest));
+                    grunt.log.writelns('Done! [Created] -> ' + cssDest);
 
                     cb(null);
                 }
