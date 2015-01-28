@@ -310,7 +310,6 @@ module.exports = function(grunt) {
                         imageSetSpriteCreator.set2xData({
                             height: spriteImgData.properties.height,
                             width: spriteImgData.properties.width,
-                            padding: options.padding,
                             coordinates: coordinates,
                             list: retinaImgList
                         });
