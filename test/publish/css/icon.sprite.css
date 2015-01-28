@@ -60,7 +60,7 @@ a[href*='}{']::after{ content:'}{';}
 span{ background: no-repeat;background-position: -26px -62px; }
 
 
-/* ../images/icon.png?20150128114304 */
+/* ../images/icon.png?20150128153834 */
 .icon_switch-off,
 .icon_switch-on,
 .icon_tip-error,
@@ -75,11 +75,11 @@ span{ background: no-repeat;background-position: -26px -62px; }
 .iocn_ext10,
 #iocn_ext11,
 span{
-background-image: url(../images/icon.png?20150128114304);
+background-image: url(../images/icon.png?20150128153834);
 }
 
 
-/* ../images/icon@2x.png?20150128114304 */
+/* ../images/icon@2x.png?20150128153834 */
 @media only screen and (-o-min-device-pixel-ratio: 3/2), only screen and (min--moz-device-pixel-ratio: 1.5), only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min-resolution: 240dpi), only screen and (min-resolution: 2dppx) {
 .icon_switch-off,
 .icon_switch-on,
@@ -95,7 +95,7 @@ background-image: url(../images/icon.png?20150128114304);
 .iocn_ext10,
 #iocn_ext11,
 span{
-background-image: url(../images/icon@2x.png?20150128114304);
+background-image: url(../images/icon@2x.png?20150128153834);
 background-size: 96px auto;
 }
 .icon_switch-off{
@@ -142,4 +142,4 @@ background-position: -25px -60px;
 } 
 }
 
-.css_stamp{ content:"20150128114304";}
+.css_stamp{ content:"20150128153834";}
