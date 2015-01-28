@@ -44,7 +44,7 @@ a[href*='}{']::after{ content:'}{';}
 
 #iocn_ext11{
 	background:url(../slice/icon_wait.png) no-repeat;
-	background-image:url(../slice/icon_wait.png);
+	background-image:url(../slice/icon_tip-warn.png);
 	content: '}';
 }
 
