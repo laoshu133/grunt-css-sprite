@@ -358,7 +358,7 @@ module.exports = function(grunt) {
 
                         var selector;
                         tmpCss = tmpCss.replace(rselector, function(a, b) {
-                            selector = b;
+                            selector = b.trim();
 
                             return b + '{';
                         });
