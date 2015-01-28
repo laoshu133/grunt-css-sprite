@@ -7,10 +7,18 @@
 
 a[href*='}{']::after{ content:'}{';}
 
-.icon_switch-off{background-image:url("../slice/icon_switch-off.png");width:71px;height:29px}
+.icon_switch-off{@$sprite_place_9$@width:71px;height:29px}
 
 a[href*='}{']::after{ content:'}{';}
 
+.icon_switch-off{background-position: 0 0;width:71px;height:29px}
+.icon_switch-on{background-position: 0 -31px;width:71px;height:29px}
+.icon_tip-error{background-position: -73px 0;width:24px;height:24px}
+.icon_tip-ok{background-position: -73px -26px;width:24px;height:24px}
+.icon_tip-warn{background-position: 0 -62px;width:24px;height:24px}
+.icon_wait{background-position: -26px -62px;width:14px;height:14px}
+
+/* comments test */
 /*.icon_switch-off{background-image:url("../slice/icon_switch-off.png");width:71px;height:29px}
 .icon_switch-on{background-image:url("../slice/icon_switch-on.png");width:71px;height:29px}
 .icon_tip-error{background-image:url("../slice/icon_tip-error.png");width:24px;height:24px}
@@ -18,34 +26,120 @@ a[href*='}{']::after{ content:'}{';}
 .icon_tip-warn{background-image:url("../slice/icon_tip-warn.png");width:24px;height:24px}
 .icon_wait{background-image:url("../slice/icon_wait.png") !important;width:14px;height:14px}*/
 
-.iocn_ext1{ background-image:url(../slice/icon_wait.png);}
-.iocn_ext1{ background-image:url(../slice/icon_wait.png); /* repeat test */}
+.iocn_ext1{ @$sprite_place_16$@}
+.iocn_ext1{ background-position: -26px -62px; /* repeat test */}
 /* miss semicolon test */
-.iocn_ext2{ height:14px; width:14px; background-image:url(../slice/icon_wait.png)}
+.iocn_ext2{ height:14px; width:14px; background-position: -26px -62px;}
 .iocn_ext3{ background-image:url(../slice/icon_wait_nofile.png); /* no file test */}
-.iocn_ext4{ background:url(../slice/icon_wait.png) no-repeat;}
-.iocn_ext5{ background:#fff url(../slice/icon_wait.png) no-repeat;}
+.iocn_ext4{ background: no-repeat;background-position: -26px -62px;}
+.iocn_ext5{ background:#fff no-repeat;background-position: -26px -62px;}
 
+/* path test */
 .iocn_ext7{ background-image:url(/slice/icon_wait.png);}
 .iocn_ext8{ background-image:url(/w/grunt-css-sprite/test/slice/icon_wait.png);}
 
 .iocn_ext9{
 	/* multi-line test */
 	background:url(/slice/icon_wait.png) no-repeat;
-	_background-image:url(../slice/icon_wait.png) no-repeat;
+	background-image: no-repeat;background-position: -26px -62px;
 }
 
 .iocn_ext10{
 	/* content test */
 	content: '}';
-	background:url(../slice/icon_tip-warn.png) no-repeat;
-	background-image:url(../slice/icon_tip-warn.png) no-repeat;
+	background: no-repeat;background-position: 0 -62px;
+	_background-image:url(../slice/icon_tip-warn.png);
 }
 
 #iocn_ext11{
-	background:url(../slice/icon_wait.png) no-repeat;
-	background-image:url(../slice/icon_wait.png);
+	@$sprite_place_23$@
+	background-position: 0 -62px;
 	content: '}';
 }
 
-span{ background:url(../slice/icon_wait.png) no-repeat; }
+span{ background: no-repeat;background-position: -26px -62px; }
+
+
+/* ../images/icon.png?20150128114304 */
+.icon_switch-off,
+.icon_switch-on,
+.icon_tip-error,
+.icon_tip-ok,
+.icon_tip-warn,
+.icon_wait,
+.iocn_ext1,
+.iocn_ext2,
+.iocn_ext4,
+.iocn_ext5,
+.iocn_ext9,
+.iocn_ext10,
+#iocn_ext11,
+span{
+background-image: url(../images/icon.png?20150128114304);
+}
+
+
+/* ../images/icon@2x.png?20150128114304 */
+@media only screen and (-o-min-device-pixel-ratio: 3/2), only screen and (min--moz-device-pixel-ratio: 1.5), only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min-resolution: 240dpi), only screen and (min-resolution: 2dppx) {
+.icon_switch-off,
+.icon_switch-on,
+.icon_tip-error,
+.icon_tip-ok,
+.icon_tip-warn,
+.icon_wait,
+.iocn_ext1,
+.iocn_ext2,
+.iocn_ext4,
+.iocn_ext5,
+.iocn_ext9,
+.iocn_ext10,
+#iocn_ext11,
+span{
+background-image: url(../images/icon@2x.png?20150128114304);
+background-size: 96px auto;
+}
+.icon_switch-off{
+background-position: 0 0;
+}
+.icon_switch-on{
+background-position: 0 -30px;
+}
+.icon_tip-error{
+background-position: -72px 0;
+}
+.icon_tip-ok{
+background-position: -72px -25px;
+}
+.icon_tip-warn{
+background-position: 0 -60px;
+}
+.icon_wait{
+background-position: -25px -60px;
+}
+.iocn_ext1{
+background-position: -25px -60px;
+}
+.iocn_ext2{
+background-position: -25px -60px;
+}
+.iocn_ext4{
+background-position: -25px -60px;
+}
+.iocn_ext5{
+background-position: -25px -60px;
+}
+.iocn_ext9{
+background-position: -25px -60px;
+}
+.iocn_ext10{
+background-position: 0 -60px;
+}
+#iocn_ext11{
+background-position: 0 -60px;
+}
+span{
+background-position: -25px -60px;
+} 
+}
+
+.css_stamp{ content:"20150128114304";}

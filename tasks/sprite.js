@@ -47,7 +47,12 @@ module.exports = function (grunt) {
         };
     }
 
-    function getBgPosCss(x, y) {
+    function getBgPosCss(x, y, ratio) {
+        if(ratio && ratio > 1) {
+            x /= ratio;
+            y /= ratio;
+        }
+
         var bgPos = ['-'+ x +'px', '-'+ y +'px'];
         if(x === 0) {
             bgPos[0] = 0;
@@ -392,15 +397,14 @@ module.exports = function (grunt) {
                 // processCss
                 function processCss(cb) {
                     var cssData = sliceData.cssData;
-                    var selectors = sliceData.selectors;
                     var useImageSet = options.useimageset;
                     var retinaSpriteImgData = sliceData.retinaSpriteImgData;
                     var retinaCoordinates = retinaSpriteImgData ? retinaSpriteImgData.coordinates : {};
-                    var retinaSelectors = sliceData.retinaSelectors = [];
+                    var retinaSelectors = [];
                     var retinaCssProps = [];
 
                     var cssSelectors = [];
-                    sliceData.cssList.forEach(function(cssItem) {
+                    sliceData.selectors.forEach(function(cssItem) {
                         var place = cssItem.place;
                         var selector = cssItem.selector;
 
@@ -418,7 +422,7 @@ module.exports = function (grunt) {
                         }
 
                         // for media query
-                        var css = selector + '{\n'+ getBgPosCss(retinaCoords.x, retinaCoords.y) +'\n}';
+                        var css = selector + '{\n'+ getBgPosCss(retinaCoords.x, retinaCoords.y, 2) +'\n}';
                         retinaCssProps.push(css);
                         retinaSelectors.push(selector);
                     });
