@@ -67,10 +67,12 @@ module.exports = function(grunt) {
     function getSliceData(src, options) {
         var cssPath = path.dirname(src);
         var cssData = grunt.file.read(src);
+        var slicePathMap = options.imagepath_map;
+        var slicePath = path.normalize(fixPath(options.imagepath));
+
+        var rurlParams = /\?.*$/;
         var rabsUrl = /^(?:\/|https?:|file:)/i;
         var rbgs = /\bbackground(?:-image)?\s*:[^;]*?url\((["\']?)([^\)]+)\1\)[^};]*;?/ig;
-        var slicePath = path.normalize(fixPath(options.imagepath));
-        var slicePathMap = options.imagepath_map;
 
         // ignore comments
         var commentsData = {};
@@ -101,7 +103,8 @@ module.exports = function(grunt) {
                 return css;
             }
 
-            var imgFullPath = fixPath(path.join(cssPath, imgUri));
+            var imgFullPath = imgUri.replace(rurlParams, '');
+            imgFullPath = fixPath(path.join(cssPath, imgFullPath));
             imgFullPath = path.normalize(imgFullPath);
 
             if(
