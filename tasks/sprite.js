@@ -449,7 +449,7 @@ module.exports = function(grunt) {
                     });
 
                     // media query css
-                    if(!useImageSet) {
+                    if(!useImageSet && retinaSelectors.length) {
                         retinaCssProps = retinaCssProps.filter(filterNullFn);
                         retinaSelectors = retinaSelectors.filter(filterNullFn);
 
