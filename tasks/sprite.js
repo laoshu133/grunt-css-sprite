@@ -9,10 +9,10 @@ module.exports = function(grunt) {
     var CSS_DATA_TMPL = '\n\n/* {imgDest} */\n{selectors}{\n{cssProps}\n}\n';
     var MEDIA_QUERY_CSS_TMPL = '\n\n/* {imgDest} */\n@media only screen and (-o-min-device-pixel-ratio: 3/2), only screen and (min--moz-device-pixel-ratio: 1.5), only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min-resolution: 240dpi), only screen and (min-resolution: 2dppx) {\n{cssText} \n}\n';
     var IMAGE_SET_CSS_TMPL = 'background-image: -webkit-image-set(url({spriteImg}) 1x, url({retinaSpriteImg}) 2x); background-image: -moz-image-set(url({spriteImg}) 1x, url({retinaSpriteImg}) 2x); background-image: -ms-image-set(url({spriteImg}) 1x, url({retinaSpriteImg}) 2x); background-image: image-set(url({spriteImg}) 1x, url({retinaSpriteImg}) 2x);';
-    var IMAGE_SET_PLACE_FILE_BEFORE = '__@__css_sprite_place_before.png';
-    var IMAGE_SET_PLACE_FILE_END = '__@__css_sprite_place_end.png';
-    var IMAGE_SET_PLACE_FILE = './lib/place.png';
 
+    function filterNullFn(v) {
+        return !!v;
+    }
 
     function fixPath(path) {
         return String(path).replace(/\\/g, '/').replace(/\/$/, '');
@@ -179,9 +179,6 @@ module.exports = function(grunt) {
 
             // 扩展参数，不建议修改，image-set 模板，占位文件
             IMAGE_SET_CSS_TMPL: IMAGE_SET_CSS_TMPL,
-            IMAGE_SET_PLACE_FILE_BEFORE: IMAGE_SET_PLACE_FILE_BEFORE,
-            IMAGE_SET_PLACE_FILE_END: IMAGE_SET_PLACE_FILE_END,
-            IMAGE_SET_PLACE_FILE: IMAGE_SET_PLACE_FILE,
 
             // 扩展参数，不建议修改， 配置模板
             MEDIA_QUERY_CSS_TMPL: MEDIA_QUERY_CSS_TMPL,
@@ -274,10 +271,6 @@ module.exports = function(grunt) {
                         css += getBgPosCss(coords.x, coords.y);
 
                         cssItem.newCss = css;
-                        // cssItem.height = coords.height;
-                        // cssItem.width = coords.width;
-                        // cssItem.x = coords.x;
-                        // cssItem.y = coords.y;
                     });
 
                     cb(null);
@@ -317,7 +310,7 @@ module.exports = function(grunt) {
                         imageSetSpriteCreator.set2xData({
                             height: spriteImgData.properties.height,
                             width: spriteImgData.properties.width,
-                            padding: 2 * options.padding,
+                            padding: options.padding,
                             coordinates: coordinates,
                             list: retinaImgList
                         });
@@ -356,10 +349,6 @@ module.exports = function(grunt) {
                         return a.replace(/\}/g, '');
                     });
 
-                    var lastInx = -1;
-                    var selectors = [];
-                    var selectorHash = {};
-
                     sliceData.cssList.forEach(function(cssItem) {
                         var place = cssItem.place;
                         var placeEscapeId = escapeRegExp(place.id);
@@ -376,21 +365,7 @@ module.exports = function(grunt) {
                             return;
                         }
 
-                        // ignore repeat selector
-                        var inx = selectorHash[selector];
-                        if(inx !== undefined) {
-                            selectors[inx] = null;
-                        }
-
-                        inx = ++lastInx;
-                        selectors[inx] = cssItem;
-                        selectorHash[selector] = inx;
-
                         cssItem.selector = selector;
-                    });
-
-                    sliceData.selectors = selectors.filter(function(cssItem) {
-                        return !!cssItem;
                     });
 
                     cb(null);
@@ -401,17 +376,32 @@ module.exports = function(grunt) {
                     var useImageSet = options.useimageset;
                     var retinaSpriteImgData = sliceData.retinaSpriteImgData;
                     var retinaCoordinates = retinaSpriteImgData ? retinaSpriteImgData.coordinates : {};
-                    var retinaSelectors = [];
-                    var retinaCssProps = [];
 
+                    var lastIndex = -1;
                     var cssSelectors = [];
-                    sliceData.selectors.forEach(function(cssItem) {
+                    var cssSelectorsHash = {};
+
+                    var retinaIndex = -1;
+                    var retinaCssProps = [];
+                    var retinaSelectors = [];
+                    var retinaSelectorsHash = {};
+
+                    sliceData.cssList.forEach(function(cssItem) {
                         var place = cssItem.place;
                         var selector = cssItem.selector;
 
-                        cssSelectors.push(selector);
                         cssData = cssData.replace(place.pattern, cssItem.newCss);
 
+                        var inx = cssSelectorsHash[selector];
+                        if(inx !== undefined) {
+                            cssSelectors[inx] = null;
+                        }
+
+                        inx = ++lastIndex;
+                        cssSelectors[inx] = selector;
+                        cssSelectorsHash[selector] = inx;
+
+                        // for media query
                         var retinaCoords;
                         var retinaImgFullPath = cssItem.retinaImgFullPath;
                         if(!useImageSet && retinaImgFullPath) {
@@ -422,11 +412,21 @@ module.exports = function(grunt) {
                             return;
                         }
 
-                        // for media query
+                        inx = retinaSelectorsHash[selector];
+                        if(inx !== undefined) {
+                            retinaSelectors[inx] = null;
+                            retinaCssProps[inx] = null;
+                        }
+
+                        inx = ++retinaIndex;
+                        retinaSelectors[inx] = selector;
+                        retinaSelectorsHash[selector] = inx;
+
                         var css = selector + '{\n'+ getBgPosCss(retinaCoords.x, retinaCoords.y, 2) +'\n}';
-                        retinaCssProps.push(css);
-                        retinaSelectors.push(selector);
+                        retinaCssProps[inx] = css;
                     });
+
+                    cssSelectors = cssSelectors.filter(filterNullFn);
 
                     var spriteImg = sliceData.spriteImg;
                     var retinaSpriteImg = sliceData.retinaSpriteImg;
@@ -446,12 +446,16 @@ module.exports = function(grunt) {
                         cssProps: css
                     });
 
+                    // media query css
                     if(!useImageSet) {
-                        var bgWidth = Math.floor(retinaSpriteImgData.properties.width / 2);
+                        retinaCssProps = retinaCssProps.filter(filterNullFn);
+                        retinaSelectors = retinaSelectors.filter(filterNullFn);
+
+                        var retinaBgWidth = Math.floor(retinaSpriteImgData.properties.width / 2);
 
                         css = retinaSelectors.join(',\n') + '{\n';
                         css += 'background-image: url('+ retinaSpriteImg +');\n';
-                        css += 'background-size: '+ bgWidth +'px auto;';
+                        css += 'background-size: '+ retinaBgWidth +'px auto;';
                         css += '\n}\n';
 
                         css += retinaCssProps.join('\n');

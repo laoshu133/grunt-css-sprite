@@ -7,7 +7,7 @@
 
 a[href*='}{']::after{ content:'}{';}
 
-.icon_switch-off{@$sprite_place_35$@width:71px;height:29px}
+.icon_switch-off{background-position: 0 0;width:71px;height:29px}
 
 a[href*='}{']::after{ content:'}{';}
 
@@ -26,7 +26,7 @@ a[href*='}{']::after{ content:'}{';}
 .icon_tip-warn{background-image:url("../slice/icon_tip-warn.png");width:24px;height:24px}
 .icon_wait{background-image:url("../slice/icon_wait.png") !important;width:14px;height:14px}*/
 
-.iocn_ext1{ @$sprite_place_42$@}
+.iocn_ext1{ background-position: -26px -62px;}
 .iocn_ext1{ background-position: -26px -62px; /* repeat test */}
 /* miss semicolon test */
 .iocn_ext2{ height:14px; width:14px; background-position: -26px -62px;}
@@ -52,7 +52,7 @@ a[href*='}{']::after{ content:'}{';}
 }
 
 #iocn_ext11{
-	@$sprite_place_50$@
+	background: no-repeat;background-position: -26px -62px;
 	background-position: 0 -62px;
 	content: '}';
 }
@@ -60,7 +60,7 @@ a[href*='}{']::after{ content:'}{';}
 span{ background: no-repeat;background-position: -26px -62px; }
 
 
-/* ../../images/imageset/icon.png?20150128153834 */
+/* ../../images/imageset/icon.png?20150128161220 */
 .icon_switch-off,
 .icon_switch-on,
 .icon_tip-error,
@@ -76,8 +76,8 @@ span{ background: no-repeat;background-position: -26px -62px; }
 .iocn_ext10,
 #iocn_ext11,
 span{
-background-image: url(../../images/imageset/icon.png?20150128153834);
-background-image: -webkit-image-set(url(../../images/imageset/icon.png?20150128153834) 1x, url(../../images/imageset/icon@2x.png?20150128153834) 2x); background-image: -moz-image-set(url(../../images/imageset/icon.png?20150128153834) 1x, url(../../images/imageset/icon@2x.png?20150128153834) 2x); background-image: -ms-image-set(url(../../images/imageset/icon.png?20150128153834) 1x, url(../../images/imageset/icon@2x.png?20150128153834) 2x); background-image: image-set(url(../../images/imageset/icon.png?20150128153834) 1x, url(../../images/imageset/icon@2x.png?20150128153834) 2x);
+background-image: url(../../images/imageset/icon.png?20150128161220);
+background-image: -webkit-image-set(url(../../images/imageset/icon.png?20150128161220) 1x, url(../../images/imageset/icon@2x.png?20150128161220) 2x); background-image: -moz-image-set(url(../../images/imageset/icon.png?20150128161220) 1x, url(../../images/imageset/icon@2x.png?20150128161220) 2x); background-image: -ms-image-set(url(../../images/imageset/icon.png?20150128161220) 1x, url(../../images/imageset/icon@2x.png?20150128161220) 2x); background-image: image-set(url(../../images/imageset/icon.png?20150128161220) 1x, url(../../images/imageset/icon@2x.png?20150128161220) 2x);
 }
 
-.css_stamp{ content:"20150128153834";}
+.css_stamp{ content:"20150128161220";}
