@@ -1,6 +1,6 @@
 var path = require('path');
 var async = require('async');
-
+var assert = require('assert');
 var cssSpriteSmith = require('css-spritesmith');
 
 module.exports = function(grunt) {
@@ -13,6 +13,9 @@ module.exports = function(grunt) {
         defaultOptions.spritepath = null;
 
         var options = this.options(defaultOptions);
+
+        assert(options.imagepath, 'An `imagepath` parameter was not provided');
+        assert(options.spritedest, 'An `spritedest` parameter was not provided');
 
         // auto compete spritepath
         var autoSpritePath = options.spritepath === null;
