@@ -16,8 +16,8 @@ module.exports = function(grunt) {
 				imagepath_map: null,
 				// 雪碧图输出目录，注意，会覆盖之前文件！默认 images/
 				spritedest: 'test/publish/images/',
-				// 替换后的背景路径，默认 ../images/
-				spritepath: '../images/',
+				// 替换后的背景路径，默认为 file.dest 和 spritedest 的相对路径
+				spritepath: null,
 				// 各图片间间距，如果设置为奇数，会强制+1以保证生成的2x图片为偶数宽高，默认 0
 				padding: 2,
 				// 是否使用 image-set 作为2x图片实现，默认不使用
@@ -57,9 +57,7 @@ module.exports = function(grunt) {
 						return String(uri).replace('/w/grunt-css-sprite/test/', '../');
 					},
 					*/
-					spritedest: 'test/publish/images/imageset/',
-					spritepath: '../../images/imageset/'
-					//,spritepath: '/w/grunt-css-sprite/test/publish/images/imageset/'
+					spritedest: 'test/publish/images/imageset/'
 				},
 				files: [{
 					// 启用动态扩展
