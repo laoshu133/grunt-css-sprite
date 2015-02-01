@@ -4,7 +4,7 @@
   "version": "0.1.6",
   "homepage": "https://github.com/laoshu133/grunt-css-sprite",
   "author": {
-    "name": "mikongge",
+    "name": "Mikongge",
     "email": "admin@laoshu133.com",
     "url": "http://laoshu133.com"
   },
@@ -21,16 +21,16 @@
       "url": "https://github.com/laoshu133/grunt-css-sprite/blob/master/LICENSE-MIT"
     }
   ],
-  "main": "Gruntfile.js",
+  "main": "tasks/sprite.js",
   "engines": {
-    "node": ">= 0.8.0"
+    "node": ">= 0.9.0"
   },
   "scripts": {
     "test": "grunt test"
   },
   "dependencies": {
     "async": "^0.9.0",
-    "spritesmith": "~1.0.0"
+    "spritesmith": "~1.1.0"
   },
   "devDependencies": {
     "grunt": "~0.4.5",
@@ -41,9 +41,10 @@
   },
   "keywords": [
     "gruntplugin",
-    "sprite",
-    "css",
-    "autosprite"
-  ],
-  "readmeFilename": "README.md"
+    "spritesmith",
+    "spritesheet",
+    "autosprite",
+    "scssprite",
+    "css"
+  ]
 }
