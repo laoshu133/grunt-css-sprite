@@ -18,10 +18,10 @@ module.exports = function(grunt) {
         var autoSpritePath = options.spritepath === null;
 
         async.eachLimit(this.files, 10, function(file, callback) {
-            var cssDest = path.dirname(file.dest);
+            var cssDest = file.dest;
 
             if(autoSpritePath) {
-                var cssDestPath = path.resolve(cssDest);
+                var cssDestPath = path.resolve(path.dirname(cssDest));
                 var spriteDestPath = path.resolve(options.spritedest);
 
                 options.spritepath = path.relative(cssDestPath, spriteDestPath);
@@ -35,11 +35,30 @@ module.exports = function(grunt) {
                 }
 
                 if(data.cssData === null) {
+                    console.log(options.cssfile, cssDest);
                     grunt.file.copy(options.cssfile, cssDest);
                     grunt.log.writelns('Done! [Copied] -> ' + cssDest);
 
                     return callback(null);
                 }
+
+                // write css
+                grunt.file.write(cssDest, data.cssData);
+                grunt.log.writelns('Done! [Created] -> ' + cssDest);
+
+                // write sprite
+                var spriteData = data.spriteData;
+                grunt.file.write(spriteData.imagePath, data.spriteData.image, {
+                    encoding: 'binary'
+                });
+                grunt.log.writelns('Done! [Created] -> ' + spriteData.imagePath);
+
+                // write retina sprite
+                var retinaSpriteData = data.retinaSpriteData;
+                grunt.file.write(retinaSpriteData.imagePath, data.retinaSpriteData.image, {
+                    encoding: 'binary'
+                });
+                grunt.log.writelns('Done! [Created] -> ' + retinaSpriteData.imagePath);
 
                 callback(null);
             });
