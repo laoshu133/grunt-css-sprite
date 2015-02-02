@@ -1,6 +1,6 @@
-## grunt-css-sprite
+# grunt-css-sprite
 
-### 这是什么
+## 这是什么
 
 这是一个帮助前端开发工程师将 css 代码中的切片合并成雪碧图的工具；
 其灵感来源于 `grunt-sprite`，由于其配置参数限制目录结构等，不能满足通用项目需求，重新造轮子发布；
@@ -18,47 +18,49 @@
 
 ### 配置说明
 
-    // 自动雪碧图
-    sprite: {
-        options: {
-            // sprite背景图源文件夹，只有匹配此路径才会处理，默认 images/slice/
-            imagepath: 'test/slice/',
-            // 映射CSS中背景路径，支持函数和数组，默认为 null
-            imagepath_map: null,
-            // 雪碧图输出目录，注意，会覆盖之前文件！默认 images/
-            spritedest: 'test/publish/images/',
-            // 替换后的背景路径，默认 ../images/
-            spritepath: '../images/',
-            // 各图片间间距，如果设置为奇数，会强制+1以保证生成的2x图片为偶数宽高，默认 0
-            padding: 2,
-            // 是否使用 image-set 作为2x图片实现，默认不使用
-			useimageset: false,
-            // 是否以时间戳为文件名生成新的雪碧图文件，如果启用请注意清理之前生成的文件，默认不生成新文件
-            newsprite: false,
-            // 给雪碧图追加时间戳，默认不追加
-            spritestamp: true,
-            // 在CSS文件末尾追加时间戳，默认不追加
-            cssstamp: true,
-            // 默认使用二叉树最优排列算法
-            algorithm: 'binary-tree',
-            // 默认使用`pixelsmith`图像处理引擎
-            engine: 'pixelsmith'
-        },
-        autoSprite: {
-            files: [{
-                // 启用动态扩展
-                expand: true,
-                // css文件源的文件夹
-                cwd: 'test/css/',
-                // 匹配规则
-                src: '*.css',
-                // 导出css和sprite的路径地址
-                dest: 'test/publish/css/',
-                // 导出的css名
-                ext: '.sprite.css'
-            }]
-        }
+```
+// 自动雪碧图
+sprite: {
+    options: {
+        // sprite背景图源文件夹，只有匹配此路径才会处理，默认 images/slice/
+        imagepath: 'test/slice/',
+        // 映射CSS中背景路径，支持函数和数组，默认为 null
+        imagepath_map: null,
+        // 雪碧图输出目录，注意，会覆盖之前文件！默认 images/
+        spritedest: 'test/publish/images/',
+        // 替换后的背景路径，默认 ../images/
+        spritepath: '../images/',
+        // 各图片间间距，如果设置为奇数，会强制+1以保证生成的2x图片为偶数宽高，默认 0
+        padding: 2,
+        // 是否使用 image-set 作为2x图片实现，默认不使用
+		useimageset: false,
+        // 是否以时间戳为文件名生成新的雪碧图文件，如果启用请注意清理之前生成的文件，默认不生成新文件
+        newsprite: false,
+        // 给雪碧图追加时间戳，默认不追加
+        spritestamp: true,
+        // 在CSS文件末尾追加时间戳，默认不追加
+        cssstamp: true,
+        // 默认使用二叉树最优排列算法
+        algorithm: 'binary-tree',
+        // 默认使用`pixelsmith`图像处理引擎
+        engine: 'pixelsmith'
+    },
+    autoSprite: {
+        files: [{
+            // 启用动态扩展
+            expand: true,
+            // css文件源的文件夹
+            cwd: 'test/css/',
+            // 匹配规则
+            src: '*.css',
+            // 导出css和sprite的路径地址
+            dest: 'test/publish/css/',
+            // 导出的css名
+            ext: '.sprite.css'
+        }]
     }
+}
+```
 
 * **files**
 
@@ -76,7 +78,7 @@
         必填项，雪碧图输出目录，注意，会覆盖之前文件！默认 images/
 
     * `spritepath`
-        必填项，替换后的背景路径，默认 ../images/
+        可选项，替换后的背景路径，默认为 `path.relative(cssDestPath, spriteDestPath);`
 
     * `padding`
         可选项，指定各图片间间距，默认 0
@@ -99,37 +101,43 @@
     * `algorithm`
         可选项，指定排列方式，有`top-down` （从上至下）, `left-right`（从左至右）, `diagonal`（从左上至右下）, `alt-diagonal` （从左下至右上）和 `binary-tree`（二叉树排列） 五种供选择，默认 `binary-tree`；参考 [Layout](https://github.com/twolfson/layout/)
 
-### 载入插件
+
+## 载入插件
 
 请不要忘了载入插件
 
-    grunt.loadNpmTasks('grunt-css-sprite');
+```
+grunt.loadNpmTasks('grunt-css-sprite');
+```
 
-### 打个比方
+## 打个比方
 
 有一个类似这样的目录结构：
 
-    ├── test/
+```
+├── test/
+    ├── css/
+        └── icon.css
+    ├── images/
+        ├── slice/
+            ├── icon-a.png
+            ├── icon-a@2x.png
+            ├── icon-b.png
+            └── icon-b@2x.png
+    └── publish/
         ├── css/
-            └── icon.css
-        ├── images/
-            ├── slice/
-                ├── icon-a.png
-                ├── icon-a@2x.png
-                ├── icon-b.png
-                └── icon-b@2x.png
-        └── publish/
-            ├── css/
-                └── icon.sprite.css
-            └── images/
-                ├── icon.png
-                └── icon@2x.png
+            └── icon.sprite.css
+        └── images/
+            ├── icon.png
+            └── icon@2x.png
+```
 
 `css/icon.css` 调用`images/slice/`目录下的切片，`grunt-css-sprite` 会将 `css/icon.css` 进行处理。
 
 `publish/css/` 目录下是处理完成的样式 `icon.sprite.css` ，而 `publish/images/` 目录下是合并完成的雪碧图。
 
-### 特别注意
+
+## 特别注意
 
 1. 生成后的雪碧图将以源 css 文件名来命名
 2. 仅当CSS中定义`url(xxxx)`的路径匹配参数`imagepath`才进行处理，和具体`background`，`background-image`CSS无关，这里有区别于`grunt-sprite`
@@ -137,7 +145,8 @@
 4. 理论上所有的切片都应该是 `.png` 格式，`png8` `png24` 和 `png32`不限
 5. `spritesmith` 默认只支持png格式，如果有其他格式需要，请参考 *可选依赖*
 
-### 可选依赖
+
+## 可选依赖
 
 `grunt-css-sprite` 使用 [spritesmith](https://github.com/Ensighten/spritesmith) 作为内部核心实现
 
@@ -183,6 +192,8 @@
 `0.1.5` 更新依赖 `spritesmith` 版本
 
 `0.1.6` 重构整体流程，支持选择器提取，进一步优化CSS文件大小
+
+`0.2.0` 分离内部逻辑，提取出 [css-spritesmith](https://github.com/laoshu133/css-spritesmith)，为支持 `gulp` 做准备
 
 
 ### 致谢
