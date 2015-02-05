@@ -58,10 +58,12 @@ module.exports = function(grunt) {
 
                 // write retina sprite
                 var retinaSpriteData = data.retinaSpriteData;
-                grunt.file.write(retinaSpriteData.imagePath, data.retinaSpriteData.image, {
-                    encoding: 'binary'
-                });
-                grunt.log.writelns('Done! [Created] -> ' + retinaSpriteData.imagePath);
+                if(retinaSpriteData) {
+                    grunt.file.write(retinaSpriteData.imagePath, data.retinaSpriteData.image, {
+                        encoding: 'binary'
+                    });
+                    grunt.log.writelns('Done! [Created] -> ' + retinaSpriteData.imagePath);
+                }
 
                 callback(null);
             });
