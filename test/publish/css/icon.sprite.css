@@ -13,10 +13,10 @@ a[href*='}{']::after{ content:'}{';}
 
 .icon_switch-off{background-position: 0 0;width:71px;height:29px}
 .icon_switch-on{background-position: 0 -31px;width:71px;height:29px}
-.icon_tip-error{background-position: 0 -62px;width:24px;height:24px}
-.icon_tip-ok{background-position: -26px -62px;width:24px;height:24px}
-.icon_tip-warn{background-position: -73px 0;width:24px;height:24px}
-.icon_wait{background-position: -73px -26px;width:14px;height:14px}
+.icon_tip-error{background-position: -73px 0;width:24px;height:24px}
+.icon_tip-ok{background-position: -73px -26px;width:24px;height:24px}
+.icon_tip-warn{background-position: 0 -62px;width:24px;height:24px}
+.icon_wait{background-position: -26px -62px;width:14px;height:14px}
 
 /* comments test */
 /*.icon_switch-off{background-image:url("../slice/icon_switch-off.png");width:71px;height:29px}
@@ -26,13 +26,13 @@ a[href*='}{']::after{ content:'}{';}
 .icon_tip-warn{background-image:url("../slice/icon_tip-warn.png");width:24px;height:24px}
 .icon_wait{background-image:url("../slice/icon_wait.png") !important;width:14px;height:14px}*/
 
-.iocn_ext1{ background-position: -73px -26px;}
-.iocn_ext1{ background-position: -73px -26px; /* repeat test */}
+.iocn_ext1{ background-position: -26px -62px;}
+.iocn_ext1{ background-position: -26px -62px; /* repeat test */}
 /* miss semicolon test */
-.iocn_ext2{ height:14px; width:14px; background-position: -73px -26px;}
+.iocn_ext2{ height:14px; width:14px; background-position: -26px -62px;}
 .iocn_ext3{ background-image:url(../slice/icon_wait_nofile.png); /* no file test */}
-.iocn_ext4{ background: no-repeat;background-position: -73px -26px;}
-.iocn_ext5{ background:#fff no-repeat;background-position: -73px -26px;}
+.iocn_ext4{ background: no-repeat;background-position: -26px -62px;}
+.iocn_ext5{ background:#fff no-repeat;background-position: -26px -62px;}
 
 /* path test */
 .iocn_ext7{ background-image:url(/slice/icon_wait.png);}
@@ -41,26 +41,26 @@ a[href*='}{']::after{ content:'}{';}
 .iocn_ext9{
 	/* multi-line test */
 	background:url(/slice/icon_wait.png) no-repeat;
-	background-image: no-repeat;background-position: -73px -26px;
+	background-image: no-repeat;background-position: -26px -62px;
 }
 
 .iocn_ext10{
 	/* content test */
 	content: '}';
-	background: no-repeat;background-position: -73px 0;
+	background: no-repeat;background-position: 0 -62px;
 	_background-image:url(../slice/icon_tip-warn.png);
 }
 
 #iocn_ext11{
-	background: no-repeat;background-position: -73px -26px;
-	background-position: -73px 0;
+	background: no-repeat;background-position: -26px -62px;
+	background-position: 0 -62px;
 	content: '}';
 }
 
-span{ background: no-repeat;background-position: -73px -26px; }
+span{ background: no-repeat;background-position: -26px -62px; }
 
 
-/* ../images/icon.png?20150202013243 */
+/* ../images/icon.png?20150326151249 */
 .icon_switch-off,
 .icon_switch-on,
 .icon_tip-error,
@@ -75,11 +75,11 @@ span{ background: no-repeat;background-position: -73px -26px; }
 .iocn_ext10,
 #iocn_ext11,
 span{
-background-image: url(../images/icon.png?20150202013243);
+background-image: url(../images/icon.png?20150326151249);
 }
 
 
-/* ../images/icon@2x.png?20150202013243 */
+/* ../images/icon@2x.png?20150326151249 */
 @media only screen and (-o-min-device-pixel-ratio: 3/2), only screen and (min--moz-device-pixel-ratio: 1.5), only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min-resolution: 240dpi), only screen and (min-resolution: 2dppx) {
 .icon_switch-off,
 .icon_switch-on,
@@ -95,7 +95,7 @@ background-image: url(../images/icon.png?20150202013243);
 .iocn_ext10,
 #iocn_ext11,
 span{
-background-image: url(../images/icon@2x.png?20150202013243);
+background-image: url(../images/icon@2x.png?20150326151249);
 background-size: 96px auto;
 }
 .icon_switch-off{
@@ -105,41 +105,41 @@ background-position: 0 0;
 background-position: 0 -30px;
 }
 .icon_tip-error{
-background-position: 0 -60px;
+background-position: -72px 0;
 }
 .icon_tip-ok{
-background-position: -25px -60px;
+background-position: -72px -25px;
 }
 .icon_tip-warn{
-background-position: -72px 0;
+background-position: 0 -60px;
 }
 .icon_wait{
-background-position: -72px -25px;
+background-position: -25px -60px;
 }
 .iocn_ext1{
-background-position: -72px -25px;
+background-position: -25px -60px;
 }
 .iocn_ext2{
-background-position: -72px -25px;
+background-position: -25px -60px;
 }
 .iocn_ext4{
-background-position: -72px -25px;
+background-position: -25px -60px;
 }
 .iocn_ext5{
-background-position: -72px -25px;
+background-position: -25px -60px;
 }
 .iocn_ext9{
-background-position: -72px -25px;
+background-position: -25px -60px;
 }
 .iocn_ext10{
-background-position: -72px 0;
+background-position: 0 -60px;
 }
 #iocn_ext11{
-background-position: -72px 0;
+background-position: 0 -60px;
 }
 span{
-background-position: -72px -25px;
+background-position: -25px -60px;
 } 
 }
 
-.css_stamp{ content:"20150202013243";}
+.css_stamp{ content:"20150326151249";}
